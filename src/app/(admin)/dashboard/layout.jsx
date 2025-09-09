@@ -1,5 +1,4 @@
-import { AppSidebar } from "@/components/shared/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import Sidebar from "./_components/SideBar";
 
 export const metadata = {
   title: "Admin Pannel | Spice Lounge",
@@ -7,18 +6,13 @@ export const metadata = {
 
 const AdminLayout = ({ children }) => {
   return (
-    <SidebarProvider
-      style={{
-        "--sidebar-width": "12rem",
-        "--sidebar-width-mobile": "12rem",
-      }}
-    >
-      <AppSidebar />
-      <main>
-        <SidebarTrigger />
+    <div className="flex min-w-[768px]">
+      <Sidebar />
+      <div className="w-56"></div>
+      <main className="flex-1 min-h-dvh overflow-y-auto no-scrollbar">
         {children}
       </main>
-    </SidebarProvider>
+    </div>
   );
 };
 
