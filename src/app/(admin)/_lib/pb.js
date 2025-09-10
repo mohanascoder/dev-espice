@@ -1,5 +1,5 @@
 import PocketBase from "pocketbase";
 
-const pb = new PocketBase("http://72.60.96.63"); // change URL
+const pb = new PocketBase("http://127.0.0.1:8090"); // change URL
 
 export default pb;

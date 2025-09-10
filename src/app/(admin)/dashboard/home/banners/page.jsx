@@ -188,7 +188,7 @@ const Home = () => {
       {/* Table */}
       <div className="p-4 mt-14 w-full">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-lg">Home Banners</h2>
+          <h2 className="font-semibold text-lg">Home (Banners)</h2>
           <button
             onClick={openAdd}
             className="px-2 py-1 bg-gray-800 text-white rounded hover:bg-gray-900 flex items-center justify-center gap-1 cursor-pointer"
@@ -229,7 +229,7 @@ const Home = () => {
                         {item.image ? (
                           <img
                             src={`${pb.files.getURL(item, item.image)}?thumb=64x0`}
-                            className="w-16 h-9 rounded object-cover mx-auto"
+                            className="w-12 h-12 rounded object-cover mx-auto hover:scale-105 transition-all duration-200"
                             alt="preview"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -392,7 +392,7 @@ const Home = () => {
             onClick={(e) => {
               e.stopPropagation();
             }}
-            className={`relative rounded w-[80dvw] md:w-auto md:h-[75dvh] transform transition-transform duration-100 ${imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"}`}
+            className={`relative rounded w-[80dvw] md:w-auto md:h-[60dvh] transform transition-transform duration-100 ${imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"}`}
           >
             <img
               src={imgOpen}

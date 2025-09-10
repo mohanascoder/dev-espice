@@ -4,7 +4,7 @@ import pb from "@/app/(admin)/_lib/pb";
 import { Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const About = () => {
+const Contact = () => {
   // const [loading, setLoading] = useState(true);
   // const router = useRouter();
 
@@ -48,7 +48,7 @@ const About = () => {
   // Form state
   const [sno, setSno] = useState(0);
   const [title, setTitle] = useState("");
-  const [page, setPage] = useState("about");
+  const [page, setPage] = useState("contact");
   const [existingImage, setExistingImage] = useState("");
   const [newImage, setNewImage] = useState(null);
 
@@ -57,7 +57,7 @@ const About = () => {
     const records = await pb.collection("banners").getFullList(
       {
         sort: "sno",
-        filter: 'page = "about"',
+        filter: 'page = "contact"',
       },
       { requestKey: null }
     );
@@ -76,7 +76,7 @@ const About = () => {
     setEditingRow(null);
     setSno(0);
     setTitle("");
-    setPage("about");
+    setPage("contact");
     setExistingImage("");
     setNewImage(null);
     setOpen(true);
@@ -86,7 +86,7 @@ const About = () => {
     setEditingRow(row);
     setSno(row.sno);
     setTitle(row.title);
-    setPage(row.page || "about");
+    setPage(row.page || "contact");
     setExistingImage(row.image || "");
     setNewImage(null);
     setOpen(true);
@@ -117,7 +117,7 @@ const About = () => {
       setEditingRow(null);
       setSno(0);
       setTitle("");
-      setPage("about"); // Reset page to "about" after saving
+      setPage("contact"); // Reset page to "about" after saving
       setExistingImage("");
       setNewImage(null);
     } catch (err) {
@@ -178,9 +178,9 @@ const About = () => {
           <span className="text-gray-600 hover:text-black">Dashboard</span>
         </a>
         <span className="text-gray-600">/</span>
-        <span className="text-gray-600">About</span>
+        <span className="text-gray-600">Contact</span>
         <span className="text-gray-600">/</span>
-        <a href="/dashboard/about/banners">
+        <a href="/dashboard/contact/banners">
           <span className="text-black">Banners</span>
         </a>
       </div>
@@ -188,7 +188,7 @@ const About = () => {
       {/* Table */}
       <div className="p-4 mt-14 w-full">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-lg">About (Banners)</h2>
+          <h2 className="font-semibold text-lg">Contact (Banners)</h2>
           <button
             onClick={openAdd}
             className="px-2 py-1 bg-gray-800 text-white rounded hover:bg-gray-900 flex items-center justify-center gap-1 cursor-pointer"
@@ -315,10 +315,9 @@ const About = () => {
               id="page"
               name="Page"
               required
-              value="about"
+              value="contact"
               onChange={(e) => setPage(e.target.value)}
-              disabled
-              className="w-full border px-3 py-2 rounded mb-3 cursor-not-allowed"
+              className="w-full border px-3 py-2 rounded mb-3"
             />
 
             <label htmlFor="img" className="block mb-2 text-sm font-medium">
@@ -414,4 +413,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Contact;

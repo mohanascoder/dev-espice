@@ -17,8 +17,8 @@ const menuItems = [
     children: [
       { title: "About Banners", href: "/dashboard/about/banners" },
       {
-        title: "Leadership",
-        href: "/dashboard/about/leadership",
+        title: "Leaders",
+        href: "/dashboard/about/leaders",
       },
     ],
     icon: "CircleQuestionMark",
@@ -26,21 +26,19 @@ const menuItems = [
   {
     title: "Brands",
     children: [
-      { title: "Brand", href: "/dashboard/brands" },
+      { title: "Brand Logo", href: "/dashboard/brands/logo" },
       { title: "Brand Banners", href: "/dashboard/brands/banners" },
-      { title: "Brand About", href: "/dashboard/brands/about" },
-      { title: "Consumer EveryDay", href: "/dashboard/brands/consumer" },
-      { title: "Brand Routes", href: "/dashboard/brands/routes" },
-      { title: "Brand Footer", href: "/dashboard/brands/footer" },
+      { title: "Brand Section", href: "/dashboard/brands/section" },
+      { title: "Brand Consumer", href: "/dashboard/brands/consumer" },
     ],
     icon: "Hexagon",
   },
   {
-    title: "Franchises",
+    title: "Franchise",
     children: [
       {
-        title: "Franchise Banners Upload",
-        href: "/dashboard/banners/franchise",
+        title: "Franchise Banners",
+        href: "/dashboard/franchise/banners",
       },
     ],
     icon: "Store",
@@ -48,8 +46,8 @@ const menuItems = [
   {
     title: "Gallery",
     children: [
-      { title: "Logo Upload", href: "/dashboard/gallery/logo" },
-      { title: "Spice Footer", href: "/dashboard/gallery/footer" },
+      { title: "Image Upload", href: "/dashboard/gallery/image" },
+      { title: "Video Upload", href: "/dashboard/gallery/video" },
     ],
     icon: "Image",
   },
@@ -86,7 +84,7 @@ const menuItems = [
   {
     title: "Contact",
     children: [
-      { title: "Contact Banners Upload", href: "/dashboard/banners/contact" },
+      { title: "Contact Banners", href: "/dashboard/contact/banners" },
     ],
     icon: "Mail",
   },

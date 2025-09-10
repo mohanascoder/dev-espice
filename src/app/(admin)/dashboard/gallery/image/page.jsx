@@ -2,23 +2,8 @@
 import { useEffect, useState } from "react";
 import pb from "@/app/(admin)/_lib/pb";
 import { Plus, Trash2, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 
-const About = () => {
-  // const [loading, setLoading] = useState(true);
-  // const router = useRouter();
-
-  // // Handle authentication
-  // useEffect(() => {
-  //   if (!pb.authStore.isValid) {
-  //     router.replace("/login");
-  //   } else {
-  //     setLoading(false);
-  //   }
-  // }, []);
-
-  // if (loading) return <div>Loading...</div>;
-
+const GalleryImage = () => {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [imgOpen, setImgOpen] = useState("");
@@ -27,37 +12,26 @@ const About = () => {
   const [fade, setFade] = useState(false);
   const [imgFade, setImgFade] = useState(false);
 
-  // Trigger fade when modal opens
   useEffect(() => {
-    if (open) {
-      setFade(true);
-    } else {
-      setFade(false);
-    }
+    setFade(open);
   }, [open]);
 
-  // Trigger fade when image modal opens
   useEffect(() => {
-    if (imgOpen) {
-      setImgFade(true);
-    } else {
-      setImgFade(false);
-    }
+    setImgFade(!!imgOpen);
   }, [imgOpen]);
 
   // Form state
   const [sno, setSno] = useState(0);
-  const [title, setTitle] = useState("");
-  const [page, setPage] = useState("about");
+  const [active, setActive] = useState(true);
   const [existingImage, setExistingImage] = useState("");
   const [newImage, setNewImage] = useState(null);
 
-  // Fetch data from PocketBase
+  // Fetch data
   const fetchData = async () => {
-    const records = await pb.collection("banners").getFullList(
+    const records = await pb.collection("gallery").getFullList(
       {
         sort: "sno",
-        filter: 'page = "about"',
+        filter: 'type = "image"',
       },
       { requestKey: null }
     );
@@ -75,8 +49,7 @@ const About = () => {
   const openAdd = () => {
     setEditingRow(null);
     setSno(0);
-    setTitle("");
-    setPage("about");
+    setActive(true);
     setExistingImage("");
     setNewImage(null);
     setOpen(true);
@@ -85,8 +58,7 @@ const About = () => {
   const openEdit = (row) => {
     setEditingRow(row);
     setSno(row.sno);
-    setTitle(row.title);
-    setPage(row.page || "about");
+    setActive(row.active);
     setExistingImage(row.image || "");
     setNewImage(null);
     setOpen(true);
@@ -96,19 +68,19 @@ const About = () => {
     try {
       let record;
       if (editingRow) {
-        const updateData = { sno, title, page };
+        const updateData = { sno, type: "image", active };
         if (newImage) {
-          updateData["image"] = newImage;
+          updateData.image = newImage;
         }
 
         record = await pb
-          .collection("banners")
+          .collection("gallery")
           .update(editingRow.id, updateData);
       } else {
-        record = await pb.collection("banners").create({
+        record = await pb.collection("gallery").create({
           sno,
-          title,
-          page,
+          type: "image",
+          active,
           image: newImage,
         });
       }
@@ -116,30 +88,25 @@ const About = () => {
       setOpen(false);
       setEditingRow(null);
       setSno(0);
-      setTitle("");
-      setPage("about"); // Reset page to "about" after saving
       setExistingImage("");
       setNewImage(null);
+      setActive(true);
+      fetchData();
     } catch (err) {
       console.error(err);
       alert("Error saving: " + err.message);
     }
-    fetchData();
   };
 
   const handleDeleteImage = async () => {
     if (!editingRow || !existingImage) return;
-
-    const confirmImageDelete = confirm(
-      "Are you sure you want to delete this image?"
-    );
+    const confirmImageDelete = confirm("Delete this image?");
     if (!confirmImageDelete) return;
 
     try {
-      const updated = await pb.collection("banners").update(editingRow.id, {
+      const updated = await pb.collection("gallery").update(editingRow.id, {
         image: "",
       });
-
       setExistingImage("");
       setData((prev) =>
         prev.map((item) => (item.id === editingRow.id ? updated : item))
@@ -152,21 +119,17 @@ const About = () => {
 
   const handleDeleteRow = async () => {
     if (!editingRow) return;
-
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this banner?"
-    );
+    const confirmDelete = confirm("Delete this record?");
     if (!confirmDelete) return;
 
     try {
-      await pb.collection("banners").delete(editingRow.id);
-
+      await pb.collection("gallery").delete(editingRow.id);
       setData((prev) => prev.filter((item) => item.id !== editingRow.id));
       setOpen(false);
       setEditingRow(null);
     } catch (err) {
       console.error(err);
-      alert("Error deleting banner: " + err.message);
+      alert("Error deleting row: " + err.message);
     }
   };
 
@@ -178,42 +141,40 @@ const About = () => {
           <span className="text-gray-600 hover:text-black">Dashboard</span>
         </a>
         <span className="text-gray-600">/</span>
-        <span className="text-gray-600">About</span>
+        <span className="text-gray-600">Gallery</span>
         <span className="text-gray-600">/</span>
-        <a href="/dashboard/about/banners">
-          <span className="text-black">Banners</span>
+        <a href="/dashboard/gallery/image">
+          <span className="text-black">Images</span>
         </a>
       </div>
 
       {/* Table */}
       <div className="p-4 mt-14 w-full">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-lg">About (Banners)</h2>
+          <h2 className="font-semibold text-lg">Gallery (Images)</h2>
           <button
             onClick={openAdd}
             className="px-2 py-1 bg-gray-800 text-white rounded hover:bg-gray-900 flex items-center justify-center gap-1 cursor-pointer"
           >
-            <Plus size={16} /> <span>Add Banner</span>
+            <Plus size={16} /> <span>Add Image</span>
           </button>
         </div>
 
         <div className="overflow-x-auto border border-gray-300">
-          {/* scrollable tbody wrapper */}
           <div className="max-h-[75vh] overflow-y-auto no-scrollbar">
             <table className="w-full min-w-[800px] text-sm">
               <tbody className="text-center">
                 <tr className="sticky top-0 bg-gray-200 shadow-2xs">
                   <th className="px-3 py-2">S.No</th>
                   <th className="px-3 py-2">Image</th>
-                  <th className="px-3 py-2">Title</th>
-                  <th className="px-3 py-2">Page</th>
+                  <th className="px-3 py-2">Active</th>
                   <th className="px-3 py-2">Created</th>
                   <th className="px-3 py-2">Updated</th>
                 </tr>
 
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-2">
+                    <td colSpan={5} className="p-2">
                       No Records
                     </td>
                   </tr>
@@ -242,10 +203,7 @@ const About = () => {
                           "N/A"
                         )}
                       </td>
-                      <td className="px-3 py-2 font-medium">{item.title}</td>
-                      <td className="px-3 py-2 text-gray-600 truncate max-w-[200px]">
-                        {item.page} {/* Updated to page */}
-                      </td>
+                      <td className="px-3 py-2">{item.active ? "✅" : "❌"}</td>
                       <td className="px-3 py-2 text-gray-500">
                         {item.created}
                       </td>
@@ -261,71 +219,44 @@ const About = () => {
         </div>
       </div>
 
-      {/* Modal for Add/Edit */}
+      {/* Modal */}
       {open && (
         <div
-          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${fade ? "opacity-100" : "opacity-0"}`}
-          onClick={() => {
-            // if (sno || title || newImage) {
-            //   const confirmStopChanging = confirm(
-            //     "You have unsaved changes. Do you really want to close?"
-            //   );
-            //   if (!confirmStopChanging) return;
-            // }
-            setOpen(false);
-          }}
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${
+            fade ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setOpen(false)}
         >
           <div
-            className={`relative bg-gray-50 rounded p-6 w-[512px] shadow transform transition-transform duration-100 ${fade ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"}`}
+            className={`relative bg-gray-50 rounded p-6 w-[512px] shadow transform transition-transform duration-100 ${
+              fade ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4">
-              {editingRow ? "Edit Banner" : "Add New Banner"}
+              {editingRow ? "Edit Image" : "Add New Image"}
             </h3>
 
-            <label htmlFor="sno" className="block mb-2 text-sm font-medium">
-              S.No
-            </label>
+            <label className="block mb-2 text-sm font-medium">S.No</label>
             <input
-              id="sno"
-              name="S.No"
               type="number"
               value={sno || ""}
               onChange={(e) => setSno(e.target.value)}
               className="w-full border px-3 py-2 rounded mb-3"
             />
 
-            <label htmlFor="title" className="block mb-2 text-sm font-medium">
-              Title
-            </label>
-            <input
-              id="title"
-              name="Title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+            <label className="block mb-2 text-sm font-medium">Active</label>
+            <select
+              value={active ? "true" : "false"}
+              onChange={(e) => setActive(e.target.value === "true")}
               className="w-full border px-3 py-2 rounded mb-3"
-            />
+            >
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
 
-            <label htmlFor="page" className="block mb-2 text-sm font-medium">
-              Page
-            </label>
+            <label className="block mb-2 text-sm font-medium">Image</label>
             <input
-              type="text"
-              id="page"
-              name="Page"
-              required
-              value="about"
-              onChange={(e) => setPage(e.target.value)}
-              disabled
-              className="w-full border px-3 py-2 rounded mb-3 cursor-not-allowed"
-            />
-
-            <label htmlFor="img" className="block mb-2 text-sm font-medium">
-              Image
-            </label>
-            <input
-              id="img"
               type="file"
               onChange={handleFileChange}
               className="w-full border px-3 py-2 rounded mb-3 border-gray-300"
@@ -383,17 +314,19 @@ const About = () => {
         </div>
       )}
 
-      {/* Preview for Image */}
+      {/* Preview */}
       {imgOpen && (
         <div
-          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${imgFade ? "opacity-100" : "opacity-0"}`}
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${
+            imgFade ? "opacity-100" : "opacity-0"
+          }`}
           onClick={() => setImgOpen("")}
         >
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className={`relative rounded w-[80dvw] md:w-auto md:h-[60dvh] transform transition-transform duration-100 ${imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`relative rounded w-[80dvw] md:w-auto md:h-[60dvh] transform transition-transform duration-100 ${
+              imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+            }`}
           >
             <img
               src={imgOpen}
@@ -414,4 +347,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default GalleryImage;

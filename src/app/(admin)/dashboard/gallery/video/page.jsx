@@ -2,54 +2,31 @@
 import { useEffect, useState } from "react";
 import pb from "@/app/(admin)/_lib/pb";
 import { Plus, Trash2, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 
-const Leadership = () => {
-  // const [loading, setLoading] = useState(true);
-  // const router = useRouter();
-
-  // // Handle authentication
-  // useEffect(() => {
-  //   if (!pb.authStore.isValid) {
-  //     router.replace("/login");
-  //   } else {
-  //     setLoading(false);
-  //   }
-  // }, []);
-
-  // if (loading) return <div>Loading...</div>;
-
+const GalleryVideo = () => {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
-  const [imgOpen, setImgOpen] = useState("");
+  const [videoOpen, setVideoOpen] = useState("");
   const [editingRow, setEditingRow] = useState(null);
 
   const [fade, setFade] = useState(false);
-  const [imgFade, setImgFade] = useState(false);
+  const [videoFade, setVideoFade] = useState(false);
 
-  // Trigger fade when modal opens
-  useEffect(() => {
-    setFade(open);
-  }, [open]);
-
-  // Trigger fade when image modal opens
-  useEffect(() => {
-    setImgFade(!!imgOpen);
-  }, [imgOpen]);
+  useEffect(() => setFade(open), [open]);
+  useEffect(() => setVideoFade(!!videoOpen), [videoOpen]);
 
   // Form state
   const [sno, setSno] = useState(0);
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [description, setDescription] = useState("");
-  const [existingImage, setExistingImage] = useState("");
-  const [newImage, setNewImage] = useState(null);
+  const [active, setActive] = useState(true);
+  const [existingVideo, setExistingVideo] = useState("");
+  const [newVideo, setNewVideo] = useState(null);
 
-  // Fetch data from PocketBase
+  // Fetch data
   const fetchData = async () => {
-    const records = await pb.collection("leaders").getFullList(
+    const records = await pb.collection("gallery").getFullList(
       {
         sort: "sno",
+        filter: 'type = "video"',
       },
       { requestKey: null }
     );
@@ -61,108 +38,88 @@ const Leadership = () => {
   }, []);
 
   const handleFileChange = (e) => {
-    setNewImage(e.target.files[0]);
+    setNewVideo(e.target.files[0]);
   };
 
   const openAdd = () => {
     setEditingRow(null);
     setSno(0);
-    setName("");
-    setRole("");
-    setDescription("");
-    setExistingImage("");
-    setNewImage(null);
+    setActive(true);
+    setExistingVideo("");
+    setNewVideo(null);
     setOpen(true);
   };
 
   const openEdit = (row) => {
     setEditingRow(row);
     setSno(row.sno);
-    setName(row.name || "");
-    setRole(row.role || "");
-    setDescription(row.description || "");
-    setExistingImage(row.image || "");
-    setNewImage(null);
+    setActive(row.active);
+    setExistingVideo(row.video || "");
+    setNewVideo(null);
     setOpen(true);
   };
 
   const handleSave = async () => {
     try {
-      let record;
       if (editingRow) {
-        const updateData = { sno, name, role, description };
-        if (newImage) {
-          updateData["image"] = newImage;
-        }
+        const updateData = { sno, type: "video", active };
+        if (newVideo) updateData.video = newVideo;
 
-        record = await pb
-          .collection("leaders")
-          .update(editingRow.id, updateData);
+        await pb.collection("gallery").update(editingRow.id, updateData);
       } else {
-        record = await pb.collection("leaders").create({
+        await pb.collection("gallery").create({
           sno,
-          name,
-          role,
-          description,
-          image: newImage,
+          type: "video",
+          active,
+          video: newVideo,
         });
       }
 
       setOpen(false);
       setEditingRow(null);
       setSno(0);
-      setName("");
-      setRole("");
-      setDescription("");
-      setExistingImage("");
-      setNewImage(null);
+      setExistingVideo("");
+      setNewVideo(null);
+      setActive(true);
+      fetchData();
     } catch (err) {
       console.error(err);
       alert("Error saving: " + err.message);
     }
-    fetchData();
   };
 
-  const handleDeleteImage = async () => {
-    if (!editingRow || !existingImage) return;
-
-    const confirmImageDelete = confirm(
-      "Are you sure you want to delete this image?"
-    );
-    if (!confirmImageDelete) return;
+  const handleDeleteFile = async () => {
+    if (!editingRow || !existingVideo) return;
+    const confirmDelete = confirm("Delete this video?");
+    if (!confirmDelete) return;
 
     try {
-      const updated = await pb.collection("leaders").update(editingRow.id, {
-        image: "",
+      const updated = await pb.collection("gallery").update(editingRow.id, {
+        video: "",
       });
-
-      setExistingImage("");
+      setExistingVideo("");
       setData((prev) =>
         prev.map((item) => (item.id === editingRow.id ? updated : item))
       );
     } catch (err) {
       console.error(err);
-      alert("Error deleting image: " + err.message);
+      alert("Error deleting video: " + err.message);
     }
   };
 
   const handleDeleteRow = async () => {
     if (!editingRow) return;
-
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this leader?"
-    );
+    const confirmDelete = confirm("Delete this record?");
     if (!confirmDelete) return;
 
     try {
-      await pb.collection("leaders").delete(editingRow.id);
-
+      await pb.collection("gallery").delete(editingRow.id);
       setData((prev) => prev.filter((item) => item.id !== editingRow.id));
       setOpen(false);
       setEditingRow(null);
     } catch (err) {
       console.error(err);
-      alert("Error deleting leader: " + err.message);
+      alert("Error deleting row: " + err.message);
     }
   };
 
@@ -174,43 +131,40 @@ const Leadership = () => {
           <span className="text-gray-600 hover:text-black">Dashboard</span>
         </a>
         <span className="text-gray-600">/</span>
-        <span className="text-gray-600">About</span>
+        <span className="text-gray-600">Gallery</span>
         <span className="text-gray-600">/</span>
-        <a href="/dashboard/about/leadership">
-          <span className="text-black">Leadership</span>
+        <a href="/dashboard/gallery/video">
+          <span className="text-black">Videos</span>
         </a>
       </div>
 
       {/* Table */}
       <div className="p-4 mt-14 w-full">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-lg">Leaders</h2>
+          <h2 className="font-semibold text-lg">Gallery (Videos)</h2>
           <button
             onClick={openAdd}
             className="px-2 py-1 bg-gray-800 text-white rounded hover:bg-gray-900 flex items-center justify-center gap-1 cursor-pointer"
           >
-            <Plus size={16} /> <span>Add Leader</span>
+            <Plus size={16} /> <span>Add Video</span>
           </button>
         </div>
 
         <div className="overflow-x-auto border border-gray-300">
-          {/* scrollable tbody wrapper */}
           <div className="max-h-[75vh] overflow-y-auto no-scrollbar">
             <table className="w-full min-w-[800px] text-sm">
               <tbody className="text-center">
                 <tr className="sticky top-0 bg-gray-200 shadow-2xs">
                   <th className="px-3 py-2">S.No</th>
-                  <th className="px-3 py-2">Image</th>
-                  <th className="px-3 py-2">Name</th>
-                  <th className="px-3 py-2">Role</th>
-                  <th className="px-3 py-2">Description</th>
+                  <th className="px-3 py-2">Video</th>
+                  <th className="px-3 py-2">Active</th>
                   <th className="px-3 py-2">Created</th>
                   <th className="px-3 py-2">Updated</th>
                 </tr>
 
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-2">
+                    <td colSpan={5} className="p-2">
                       No Records
                     </td>
                   </tr>
@@ -223,29 +177,20 @@ const Leadership = () => {
                     >
                       <td className="px-3 py-2">{item.sno}</td>
                       <td className="px-3 py-2">
-                        {item.image ? (
-                          <img
-                            src={`${pb.files.getURL(item, item.image)}?thumb=64x0`}
-                            className="w-16 h-9 rounded object-cover mx-auto"
-                            alt="preview"
+                        {item.video ? (
+                          <video
+                            src={pb.files.getURL(item, item.video)}
+                            className="w-12 h-12 rounded object-cover mx-auto hover:scale-105 transition-all duration-200"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setImgOpen(
-                                `${pb.files.getURL(item, item.image)}?thumb=1024x0`
-                              );
+                              setVideoOpen(pb.files.getURL(item, item.video));
                             }}
                           />
                         ) : (
                           "N/A"
                         )}
                       </td>
-                      <td className="px-3 py-2 font-medium">{item.name}</td>
-                      <td className="px-3 py-2 text-gray-600 truncate max-w-[200px]">
-                        {item.role}
-                      </td>
-                      <td className="px-3 py-2 text-gray-500">
-                        {item.description}
-                      </td>
+                      <td className="px-3 py-2">{item.active ? "✅" : "❌"}</td>
                       <td className="px-3 py-2 text-gray-500">
                         {item.created}
                       </td>
@@ -261,7 +206,7 @@ const Leadership = () => {
         </div>
       </div>
 
-      {/* Modal for Add/Edit */}
+      {/* Modal */}
       {open && (
         <div
           className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${
@@ -270,92 +215,62 @@ const Leadership = () => {
           onClick={() => setOpen(false)}
         >
           <div
-            className={`relative bg-gray-50 rounded p-6 w-[512px] h-[70dvh] overflow-y-auto no-scrollbar shadow transform transition-transform duration-100 ${
+            className={`relative bg-gray-50 rounded p-6 w-[512px] shadow transform transition-transform duration-100 ${
               fade ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold mb-4">
-              {editingRow ? "Edit Leader" : "Add New Leader"}
+              {editingRow ? "Edit Video" : "Add New Video"}
             </h3>
 
-            <label htmlFor="sno" className="block mb-2 text-sm font-medium">
-              S.No
-            </label>
+            <label className="block mb-2 text-sm font-medium">S.No</label>
             <input
-              id="sno"
               type="number"
               value={sno || ""}
-              onChange={(e) => setSno(Number(e.target.value))}
+              onChange={(e) => setSno(e.target.value)}
               className="w-full border px-3 py-2 rounded mb-3"
             />
 
-            <label htmlFor="name" className="block mb-2 text-sm font-medium">
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+            <label className="block mb-2 text-sm font-medium">Active</label>
+            <select
+              value={active ? "true" : "false"}
+              onChange={(e) => setActive(e.target.value === "true")}
               className="w-full border px-3 py-2 rounded mb-3"
-            />
-
-            <label htmlFor="role" className="block mb-2 text-sm font-medium">
-              Role
-            </label>
-            <input
-              id="role"
-              type="text"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full border px-3 py-2 rounded mb-3"
-            />
-
-            <label
-              htmlFor="description"
-              className="block mb-2 text-sm font-medium"
             >
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full border px-3 py-2 rounded mb-3"
-            />
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
 
-            <label htmlFor="img" className="block mb-2 text-sm font-medium">
-              Image
-            </label>
+            <label className="block mb-2 text-sm font-medium">Video</label>
             <input
-              id="img"
               type="file"
               onChange={handleFileChange}
               className="w-full border px-3 py-2 rounded mb-3 border-gray-300"
             />
 
             <div className="flex gap-2 mb-4 items-center">
-              {existingImage && editingRow && (
+              {existingVideo && (
                 <div className="relative">
-                  <img
-                    src={pb.files.getURL(editingRow, existingImage)}
-                    className="w-32 h-18 rounded object-cover"
+                  <video
+                    src={pb.files.getURL(editingRow, existingVideo)}
+                    className="w-auto h-32 rounded object-cover"
+                    controls
                   />
                   <button
                     type="button"
-                    onClick={handleDeleteImage}
+                    onClick={handleDeleteFile}
                     className="absolute top-0 right-0 bg-red-600 text-white rounded-bl"
                   >
                     <X size={12} />
                   </button>
                 </div>
               )}
-              {newImage && (
-                <img
-                  src={URL.createObjectURL(newImage)}
-                  className="w-16 h-16 rounded object-cover"
+              {newVideo && (
+                <video
+                  src={URL.createObjectURL(newVideo)}
+                  className="w-auto h-20 rounded object-cover"
+                  controls
                 />
               )}
             </div>
@@ -388,30 +303,30 @@ const Leadership = () => {
         </div>
       )}
 
-      {/* Preview for Image */}
-      {imgOpen && (
+      {/* Preview */}
+      {videoOpen && (
         <div
           className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${
-            imgFade ? "opacity-100" : "opacity-0"
+            videoFade ? "opacity-100" : "opacity-0"
           }`}
-          onClick={() => setImgOpen("")}
+          onClick={() => setVideoOpen("")}
         >
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className={`relative rounded w-[80dvw] md:w-auto md:h-[75dvh] transform transition-transform duration-100 ${
-              imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+            onClick={(e) => e.stopPropagation()}
+            className={`relative rounded w-[80dvw] md:w-auto md:h-[70dvh] transform transition-transform duration-100 ${
+              videoFade
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-5 opacity-0"
             }`}
           >
-            <img
-              src={imgOpen}
-              alt="preview"
+            <video
+              src={videoOpen}
+              controls
               className="w-full h-full object-contain"
             />
 
             <button
-              onClick={() => setImgOpen("")}
+              onClick={() => setVideoOpen("")}
               className="absolute top-0 right-0 p-1 rounded-bl-xl bg-red-600 text-white"
             >
               <X />
@@ -423,4 +338,4 @@ const Leadership = () => {
   );
 };
 
-export default Leadership;
+export default GalleryVideo;
