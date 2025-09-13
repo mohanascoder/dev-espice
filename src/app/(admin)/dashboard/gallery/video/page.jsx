@@ -25,7 +25,7 @@ const GalleryVideo = () => {
   const fetchData = async () => {
     const records = await pb.collection("gallery").getFullList(
       {
-        sort: "sno",
+        sort: "-sno",
         filter: 'type = "video"',
       },
       { requestKey: null }
@@ -169,13 +169,13 @@ const GalleryVideo = () => {
                     </td>
                   </tr>
                 ) : (
-                  data.map((item) => (
+                  data.map((item,i) => (
                     <tr
                       key={item.id}
                       className="border-t bg-gray-50 hover:bg-gray-100 cursor-pointer"
                       onClick={() => openEdit(item)}
                     >
-                      <td className="px-3 py-2">{item.sno}</td>
+                      <td className="px-3 py-2">{i+1}</td>
                       <td className="px-3 py-2">
                         {item.video ? (
                           <video
@@ -232,14 +232,14 @@ const GalleryVideo = () => {
               className="w-full border px-3 py-2 rounded mb-3"
             />
 
-            <label className="block mb-2 text-sm font-medium">Active</label>
+            <label className="block mb-2 text-sm font-medium">Mode</label>
             <select
               value={active ? "true" : "false"}
               onChange={(e) => setActive(e.target.value === "true")}
               className="w-full border px-3 py-2 rounded mb-3"
             >
-              <option value="true">True</option>
-              <option value="false">False</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
             </select>
 
             <label className="block mb-2 text-sm font-medium">Video</label>

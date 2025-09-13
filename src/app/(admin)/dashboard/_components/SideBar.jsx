@@ -40,6 +40,10 @@ const menuItems = [
         title: "Franchise Banners",
         href: "/dashboard/franchise/banners",
       },
+      {
+        title: "Franchise Form",
+        href: "/dashboard/franchise/form",
+      },
     ],
     icon: "Store",
   },
@@ -54,30 +58,36 @@ const menuItems = [
   {
     title: "Investor-Relation",
     children: [
-      { title: "Investor Banners Upload", href: "/dashboard/banners/investor" },
-      { title: "Corporate Address", href: "/dashboard/corporate/address" },
-      { title: "Annual Report", href: "/dashboard/corporate/annual-report" },
+      { title: "Investor Banners", href: "/dashboard/investor/banners" },
+      {
+        title: "Corporate Information",
+        href: "/dashboard/investor/corporate-info",
+      },
+      { title: "Annual Report", href: "/dashboard/investor/annual-report" },
       {
         title: "Financial Report",
-        href: "/dashboard/corporate/financial-report",
+        href: "/dashboard/investor/financial-report",
       },
       {
         title: "Shareholder Report",
-        href: "/dashboard/corporate/shareholder-report",
+        href: "/dashboard/investor/shareholder-report",
       },
       {
         title: "Corporate Governance",
-        href: "/dashboard/corporate/governance",
+        href: "/dashboard/investor/governance",
       },
-      { title: "Policies", href: "/dashboard/corporate/policies" },
-      { title: "Disclosure", href: "/dashboard/corporate/disclosure" },
-      { title: "News & Events", href: "/dashboard/corporate/news-events" },
-      { title: "Misc Files", href: "/dashboard/corporate/misc" },
+      { title: "Disclosure", href: "/dashboard/investor/disclosure" },
+      { title: "Meetings", href: "/dashboard/investor/meetings" },
+      { title: "Policies", href: "/dashboard/investor/policies" },
       {
-        title: "Open Offer 2024",
-        href: "/dashboard/corporate/open-offer-2024",
+        title: "Stock Exchange Filings",
+        href: "/dashboard/investor/stock-exchange",
       },
-      { title: "Live Stock Info", href: "/dashboard/corporate/live-stock" },
+      {
+        title: "Open Offer",
+        href: "/dashboard/investor/open-offer",
+      },
+      { title: "Live Stock Info", href: "/dashboard/investor/live-stock" },
     ],
     icon: "Handshake",
   },
@@ -85,6 +95,7 @@ const menuItems = [
     title: "Contact",
     children: [
       { title: "Contact Banners", href: "/dashboard/contact/banners" },
+      { title: "Contact Form", href: "/dashboard/contact/form" },
     ],
     icon: "Mail",
   },

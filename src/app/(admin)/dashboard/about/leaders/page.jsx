@@ -90,7 +90,7 @@ const Leadership = () => {
     try {
       let record;
       if (editingRow) {
-        const updateData = { sno, name, role, description };
+        const updateData = { sno, name, role, description, page: "about" };
         if (newImage) {
           updateData["image"] = newImage;
         }
@@ -104,6 +104,7 @@ const Leadership = () => {
           name,
           role,
           description,
+          page: "about",
           image: newImage,
         });
       }
@@ -243,7 +244,7 @@ const Leadership = () => {
                       <td className="px-3 py-2 text-gray-600 truncate max-w-[200px]">
                         {item.role}
                       </td>
-                      <td className="px-3 py-2 text-gray-500">
+                      <td className="px-3 py-2 text-gray-500 text-justify">
                         {item.description}
                       </td>
                       <td className="px-3 py-2 text-gray-500">
