@@ -3,19 +3,44 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-
-
-
-import React from "react";
+import React, { useEffect, useState } from "react";
+import pb from "../_lib/pb";
 
 export default function Footer() {
-  const pathname = usePathname()
-  
+  const pathname = usePathname();
 
   const getLinkClass = (path) =>
     pathname === path || pathname.includes(path)
       ? "text-[#d13b2a]"
       : "text-white hover:text-[#d13b2a]";
+
+  const [data, setData] = useState({
+    brands: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [brandsRes] = await Promise.all([
+          pb
+            .collection("brands")
+            .getFullList(200, { sort: "sno", requestKey: null }),
+        ]);
+
+        setData({
+          brands: brandsRes,
+        });
+
+        console.log({
+          brands: brandsRes,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const links = [
     { name: "Home", path: "/" },
@@ -97,12 +122,20 @@ export default function Footer() {
             </h3>
             <div>
               <ul className="space-y-1 text-sm">
-                <a href="/brands/bufewings">
-                  <li className={getLinkClass("/brands/bufewings")}>
-                    Buffalo Wild Wings
-                  </li>
-                </a>
-                <a href="/brands/wing">
+                {data.brands.length > 0 ? (
+                  data.brands.map((brand) => {
+                    return (
+                      <a href={`/brands/${brand.name}`} key={brand.id}>
+                        <li className={getLinkClass(brand.name)}>
+                          {brand.name}
+                        </li>
+                      </a>
+                    );
+                  })
+                ) : (
+                  <></>
+                )}
+                {/* <a href="/brands/wing">
                   <li className={getLinkClass("/brands/wing")}>Wing Zone</li>
                 </a>
                 <a href="/brands/blaze">
@@ -126,7 +159,7 @@ export default function Footer() {
                 </a>
                 <a href="/brands/teksoft">
                   <li className={getLinkClass("/brands/teksoft")}>Teksoft</li>
-                </a>
+                </a> */}
               </ul>
             </div>
           </div>
