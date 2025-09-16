@@ -30,7 +30,7 @@ export default function NavBar() {
         {/* Logo and Stock Link */}
         <div className="flex gap-4 md:gap-8 items-center">
           <Link href="/">
-            <img className="h-14" src="/img/shared/logos/logo.png" alt="Logo" />
+            <img className="h-14" src="/images/logo.png" alt="Logo" />
             {/* You could use next/image here if desired */}
           </Link>
 

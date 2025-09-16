@@ -32,7 +32,7 @@ export default function Footer() {
         <div className="col-span-3">
           <div className="flex justify-center">
             <img
-              src="/shared/logos/logo.png"
+              src="/images/logo.png"
               alt="Logo"
               className="w-24 mb-4 rounded"
             />
@@ -46,23 +46,23 @@ export default function Footer() {
           <div className="mt-4 flex gap-6 items-center justify-center">
             <img
               className="h-6 w-6 rounded object-cover"
-              src="/gallery/facebook.png"
+              src="/images/shared/logos/facebook.png"
               alt="Facebook"
             />
             <img
               className="h-6 w-6 rounded object-cover"
-              src="/gallery/instagram.png"
+              src="/images/shared/logos/instagram.png"
               alt="Instagram"
             />
             {/* <Linkedin className="text-blue-500" /> */}
             <img
               className="h-6 w-6 rounded object-cover"
-              src="/gallery/google-logo.png"
+              src="/images/shared/logos/google-logo.png"
               alt="Google"
             />
             <img
               className="h-6 w-6 rounded object-cover"
-              src="/gallery/youtube.png"
+              src="/images/shared/logos/youtube.png"
               alt="Google"
             />
           </div>

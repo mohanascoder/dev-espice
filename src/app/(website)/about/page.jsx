@@ -1,51 +1,72 @@
 "use client";
-import Carousel from "@/components/shared/Carousel";
 import NavBar from "@/components/shared/NavBar";
 import React, { useEffect, useState } from "react";
-
-import axios from "axios";
 import Footer from "../footer/page";
+import pb from "../_lib/pb";
 
 const About = () => {
-  const [teams, setTeams] = useState([]);
-  const [brandLogos, setBrandLogos] = useState([]);
-  const banners = ["/img/about/banner.jpg"];
+  const [loading, setLoading] = useState(true);
+
+  const [data, setData] = useState({
+    banners: [],
+    brands: [],
+    leaders: [],
+  });
 
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://72.60.96.63/api/collections/brands/records"
-        );
-        setBrandLogos(response.data.items);
+        const [bannersRes, brandsRes, leadersRes] = await Promise.all([
+          pb.collection("banners").getFullList(200, {
+            sort: "sno",
+            filter: 'page = "about"',
+            requestKey: null,
+          }),
+          pb
+            .collection("brands")
+            .getFullList(200, { sort: "sno", requestKey: null }),
+          pb.collection("leaders").getFullList(200, {
+            sort: "sno",
+            filter: 'page = "about"',
+            requestKey: null,
+          }),
+        ]);
+
+        setData({
+          banners: bannersRes.map((item) => pb.files.getURL(item, item.image)),
+          brands: brandsRes,
+          leaders: leadersRes,
+        });
+
+        console.log({
+          banners: bannersRes,
+          brands: brandsRes,
+          leaders: leadersRes,
+        });
       } catch (error) {
-        console.error("Fetch brandLogos error:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchTeams();
+
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const response = await axios.get(
-          "http://72.60.96.63/api/collections/leaders/records"
-        );
-        // console.log(response.data, "leaders");
-        setTeams(response.data.items);
-      } catch (error) {
-        console.error("Fetch leaders error:", error);
-      }
-    };
-    fetchTeams();
-  }, []);
+  if (loading)
+    return (
+      <>
+        <div className="h-dvh w-dvw flex justify-center items-center">
+          <div className="w-20 h-20 border-4 border-gray-300 border-t-4 border-t-[#152768] rounded-full animate-spin"></div>
+        </div>
+      </>
+    );
 
   return (
     <div>
       <NavBar />
-      <Carousel slides={banners} slideInterval={3000} />
       <div className="mt-16 max-w-7xl mx-auto mb-4">
-        <img className="w-full" src="about/banner.jpg" alt="" />
+        <img className="w-full" src={data.banners[0]} alt="" />
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 bg-orange-200/50">
         <h2 className="text-xl lg:text-2xl font-bold mb-4 tracking-wide text-center uppercase">
@@ -85,13 +106,16 @@ const About = () => {
         </p>
 
         <div className="pt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 items-center gap-2">
-          {brandLogos.length > 0 ? (
-            brandLogos.map((brands, index) => {
+          {data.brands.length > 0 ? (
+            data.brands.map((brand, index) => {
               return (
-                <div key={index} className="flex items-center justify-center border border-gray-300 rounded-2xl">
+                <div
+                  key={index}
+                  className="flex items-center justify-center border border-gray-300 rounded-2xl p-2"
+                >
                   <img
-                    className="h-24 lg:h-20"
-                    src={`http://72.60.96.63/api/files/${brands?.collectionId}/${brands?.id}/${brands.logo}`}
+                    className="h-24 lg:h-20 object-contain"
+                    src={pb.files.getURL(brand, brand.logo)}
                     alt=""
                   />
                 </div>
@@ -120,29 +144,30 @@ const About = () => {
           Lounge brand through strategic growth, quality excellence, and
           customer-first thinking.
         </p>
-        {teams.length > 0 ? (
-          teams.map((team, index) => {
-            // console.log(team, "team");
+        {data.leaders.length > 0 ? (
+          data.leaders.map((leader) => {
             return (
-              <div key={team.id || index} className="mt-8 lg:flex gap-12">
+              <div key={leader.id} className="mt-8 lg:flex gap-12">
                 <div className="lg:w-1/4 border rounded-3xl hover:shadow-xl transition-all duration-300 group cursor-pointer ease-in-out transform hover:scale-[1.02]">
                   <img
-                    className="object-contain rounded-3xl"
-                    src={`http://72.60.96.63/api/files/${team?.collectionId}/${team?.id}/${team.image}`}
-                    alt={team?.collectionId}
+                    className="h-64 object-contain rounded-3xl"
+                    src={pb.files.getURL(leader, leader.image)}
+                    alt={leader.name}
                   />
                 </div>
                 <p className="lg:w-3/4 text-justify">
-                  <span className="text-[#152768] font-bold">{team?.name}</span>
-                  - {team?.role}
+                  <span className="text-[#152768] font-bold">
+                    {leader?.name}
+                  </span>
+                  {" - "} {leader?.role}
                   <br /> <br />
-                  {team?.description}
+                  {leader?.description}
                 </p>
               </div>
             );
           })
         ) : (
-          <p>Loading team members...</p>
+          <p>Loading leader members...</p>
         )}
       </section>
 
@@ -163,7 +188,7 @@ const About = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/img/about/csv/idea.png"
+                  src="/images/about/core/idea.png"
                   alt="idea"
                 />
               </div>
@@ -174,7 +199,7 @@ const About = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/img/about/csv/settings.png"
+                  src="/images/about/core/settings.png"
                   alt="settings"
                 />
               </div>
@@ -185,7 +210,7 @@ const About = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/img/about/csv/customer.png"
+                  src="/images/about/core/customer.png"
                   alt="customer"
                 />
               </div>
@@ -196,7 +221,7 @@ const About = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/img/about/csv/collaborate.png"
+                  src="/images/about/core/collaborate.png"
                   alt="collabrate"
                 />
               </div>
@@ -209,7 +234,7 @@ const About = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/img/about/csv/handshake.png"
+                  src="/images/about/core/handshake.png"
                   alt="handshake"
                 />
               </div>
@@ -221,7 +246,7 @@ const About = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/img/about/csv/building.png"
+                  src="/images/about/core/building.png"
                   alt="building"
                 />
               </div>

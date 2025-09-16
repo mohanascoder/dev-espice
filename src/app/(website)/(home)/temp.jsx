@@ -6,7 +6,6 @@ import Footer from "../footer/page";
 import { ArrowRight, MoveRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import pb from "../_lib/pb";
-import Slider from "react-slick";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -18,25 +17,35 @@ const Home = () => {
     videos: [],
   });
 
-  const sliderSettings = {
-    autoplay: true,
-    dots: false,
-    infinite: true,
-    autoplaySpeed: 2500,
-    speed: 1000,
-    slidesToShow: 5, // Default for desktop
-    slidesToScroll: 1,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: { slidesToShow: 2 },
-      },
-      {
-        breakpoint: 768,
-        settings: { slidesToShow: 1 },
-      },
-    ],
+  // State to keep track of the current slide
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slidesToShow = 3; // Number of slides to show at once
+
+  // Go to the next slide
+  const nextSlide = () => {
+    if (currentSlide < data.videos.length - slidesToShow) {
+      setCurrentSlide(currentSlide + 1);
+    } else {
+      setCurrentSlide(0); // Loop back to the first slide
+    }
   };
+
+  // Go to the previous slide
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    } else {
+      setCurrentSlide(data.videos.length - slidesToShow);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentSlide]);
 
   const [galactive, setGalactive] = useState("img");
 
@@ -286,7 +295,7 @@ const Home = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/home/bs/buildings.png"
+                  src="/img/home/bs/buildings.png"
                   alt="buildings"
                 />
               </div>
@@ -302,7 +311,7 @@ const Home = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/home/bs/cpu.png"
+                  src="/img/home/bs/cpu.png"
                   alt="cpu"
                 />
               </div>
@@ -316,7 +325,7 @@ const Home = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/home/bs/worldglobe.png"
+                  src="/img/home/bs/worldglobe.png"
                   alt="worldglobe"
                 />
               </div>
@@ -331,7 +340,7 @@ const Home = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/home/bs/profit.png"
+                  src="/img/home/bs/profit.png"
                   alt="profit"
                 />
               </div>
@@ -343,7 +352,7 @@ const Home = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/home/bs/team.png"
+                  src="/img/home/bs/team.png"
                   alt="team"
                 />
               </div>
@@ -357,7 +366,7 @@ const Home = () => {
               <div className="flex items-center justify-center">
                 <img
                   className="w-12 h-12 object-contain"
-                  src="/home/bs/award.png"
+                  src="/img/home/bs/award.png"
                   alt="award"
                 />
               </div>
@@ -443,7 +452,6 @@ const Home = () => {
               ) : (
                 <p>Loading images...</p>
               )}
-
             </div>
             <div className="flex justify-end">
               <a href="/gallery/images">
@@ -455,12 +463,17 @@ const Home = () => {
           </>
         ) : galactive == "vid" ? (
           <>
-            <div className="max-w-7xl">
-              {data.videos && data.videos.length > 0 ? (
-                <Slider {...sliderSettings}>
-                  {data.videos.map((video) => (
-                    <a href="/gallery/videos" key={video.id}>
-                      <div key={video.id} className="px-2">
+            <div className="max-w-7xl pt-4">
+              <div className="flex overflow-hidden">
+                {/* Display a set of slides */}
+                {data.videos
+                  .slice(currentSlide, currentSlide + slidesToShow)
+                  .map((video) => (
+                    <div
+                      key={video.id}
+                      className="px-2 flex-shrink-0 w-full md:w-1/3"
+                    >
+                      <a href="/gallery/videos">
                         <video
                           className="w-full h-64 object-cover rounded-md"
                           crossOrigin="anonymous"
@@ -471,13 +484,10 @@ const Home = () => {
                           />
                           Your browser does not support the video tag.
                         </video>
-                      </div>
-                    </a>
+                      </a>
+                    </div>
                   ))}
-                </Slider>
-              ) : (
-                <p>Loading videos...</p>
-              )}
+              </div>
             </div>
 
             <div className="flex justify-end">

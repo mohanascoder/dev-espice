@@ -1,10 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "../footer/page";
 import NavBar from "@/components/shared/NavBar";
 import { Mail, MapPin, Phone } from "lucide-react";
+import pb from "../_lib/pb";
 
 const Contact = () => {
+  const [loading, setLoading] = useState(true);
+
+  const [data, setData] = useState({
+    banners: [],
+    brands: [],
+  });
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,11 +28,51 @@ const Contact = () => {
     e.preventDefault();
     alert("Form submitted! (hook up backend here 🚀)");
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bannersRes] = await Promise.all([
+          pb.collection("banners").getFullList(200, {
+            sort: "sno",
+            filter: 'page = "contact"',
+            requestKey: null,
+          }),
+          pb
+            .collection("brands")
+            .getFullList(200, { sort: "sno", requestKey: null }),
+        ]);
+
+        setData({
+          banners: bannersRes.map((item) => pb.files.getURL(item, item.image)),
+        });
+
+        console.log({
+          banners: bannersRes,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading)
+    return (
+      <>
+        <div className="h-dvh w-dvw flex justify-center items-center">
+          <div className="w-20 h-20 border-4 border-gray-300 border-t-4 border-t-[#152768] rounded-full animate-spin"></div>
+        </div>
+      </>
+    );
   return (
     <div>
       <NavBar />
       <div className="mt-16 w-full max-w-7xl mx-auto">
-        <img src="/contact/banner.jpg" alt="" />
+        <img src={data.banners[0]} alt="" />
       </div>
 
       <div className="flex items-center justify-center bg-gray-50 py-10 px-4">
@@ -33,7 +81,7 @@ const Contact = () => {
           <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center md:items-start text-center md:text-left">
             <div className="w-full flex justify-center">
               <img
-                src="/shared/logos/logo.png"
+                src="/images/shared/logos/logo.png"
                 alt="Logo"
                 className="w-64 h-auto mb-4"
               />
@@ -43,15 +91,17 @@ const Contact = () => {
                 Corparate:
               </h2>
 
-              <p className="flex items-start gap-2 text-gray-700 mb-2">
-                <MapPin className="w-20" /> Western Dallas Centre, 5th Floor,
-                Survey No.83/1, Knowledge City, Raidurg, Gachibowli, Hyderabad,
-                Telangana - 500032.
-              </p>
-              <p className="flex items-center gap-2 text-gray-700 mb-2">
-                <Phone /> +91 63626 72263
-              </p>
-              <p className="flex items-center gap-2 text-gray-700 mb-4">
+              <div className="flex items-start gap-2 text-gray-700 mb-2">
+                <MapPin size={48} />
+                <p>
+                  Western Dallas Centre, 5th Floor, Survey No.83/1, Knowledge
+                  City, Raidurg, Gachibowli, Hyderabad, Telangana - 500032.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-gray-700 mb-2">
+                <Phone /> <p>+91 63626 72263</p>
+              </div>
+              <div className="flex items-center gap-2 text-gray-700 mb-4">
                 <Mail />
                 <a
                   href="mailto:info@espicelounge.com"
@@ -59,7 +109,7 @@ const Contact = () => {
                 >
                   info@espicelounge.com
                 </a>
-              </p>
+              </div>
 
               <div className="w-full flex justify-end">
                 <button className="px-4 py-2 bg-blue-900 text-white rounded-lg shadow hover:bg-blue-800 transition">
