@@ -42,19 +42,19 @@ const menuItems = [
   },
   {
     title: "Corporate Governance",
-    href: "/investor-relation/corpgovernance",
+    href: "/investor-relation/corporate-governance",
     icon: "cg",
   },
 
   {
     title: "Disclosures under Regulation 46",
-    href: "/investor-relation/disclosure46",
+    href: "/investor-relation/disclosures",
     icon: "sr",
   },
 
   {
     title: "Meetings",
-    href: "/investor-relation/newsevents",
+    href: "/investor-relation/meetings",
     icon: "ne",
   },
   //policies
@@ -66,7 +66,7 @@ const menuItems = [
   //misc files- pending
   {
     title: "Stock Exchange Filings",
-    href: "/investor-relation/miscfiles",
+    href: "/investor-relation/stock-exchange",
     icon: "mf",
   },
   //open offer - no data
@@ -88,22 +88,22 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="w-56 bg-gray-100 text-gray-600 flex flex-col border-r-[1.5px] z-40">
-        <p className="text-2xl text-center font-bold px-3 py-3 border-b border-gray-300 text-black">
+      <div className="w-full lg:w-72 bg-gray-100 text-gray-600 flex flex-col border-r-[1.5px] z-40">
+        <p className="text-2xl text-center font-bold px-3 py-3 border-b border-gray-200 text-[#223972]">
           Spice Lounge
         </p>
 
-        <div className="bg-white rounded-xl shadow-sm p-4 lg:col-span-1">
+        <div className="bg-white rounded p-4 lg:col-span-1">
           <ul className="space-y-2">
             {menuItems.map((tab) => (
               <li key={tab.title}>
                 <a
                   href={tab.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                        pathname.includes(tab.href.toLowerCase())
-                          ? "bg-[#223972]/10 border-l-4 border-[#223972] text-[#223972] font-semibold"
-                          : "hover:bg-gray-100 text-gray-700"
-                      }`}
+                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-300 ${
+                    pathname.includes(tab.href.toLowerCase())
+                      ? "bg-[#223972]/10 border-l-4 border-[#223972] text-[#223972] font-semibold"
+                      : "hover:bg-gray-200 text-gray-700"
+                  }`}
                 >
                   {/* <img src={tab.img} alt={tab.label} className="w-5 h-5" /> */}
                   <span className="text-sm">{tab.title}</span>

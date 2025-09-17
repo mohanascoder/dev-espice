@@ -18,14 +18,14 @@ export default function RootLayout({ children }) {
   return (
     <>
       <NavBar />
-      <div className="max-w-7xl">
+      <div className="flex justify-between items-center max-w-7xl mx-auto mt-16">
         <img src={pb.files.getURL(banners[0], banners[0].image)} alt="" />
       </div>
-      <div className="flex min-w-[768px]">
+      <div className="lg:flex max-w-7xl mx-auto">
         <Sidebar />
-        <main className="flex-1 min-h-dvh overflow-y-auto no-scrollbar">
+        <div className="flex-1 overflow-y-auto no-scrollbar h-[640px]">
           {children}
-        </main>
+        </div>
       </div>
       <Footer />
     </>
