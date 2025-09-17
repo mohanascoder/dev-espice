@@ -37,24 +37,24 @@ const menuItems = [
 
   {
     title: "Shareholding Pattern",
-    href: "/investor-relation/shareholder",
+    href: "/investor-relation/shareholder-pattern",
     icon: "sr",
   },
   {
     title: "Corporate Governance",
-    href: "/investor-relation/corpgovernance",
+    href: "/investor-relation/corporate-governance",
     icon: "cg",
   },
 
   {
     title: "Disclosures under Regulation 46",
-    href: "/investor-relation/disclosure46",
+    href: "/investor-relation/disclosure-regulation46",
     icon: "sr",
   },
 
   {
     title: "Meetings",
-    href: "/investor-relation/newsevents",
+    href: "/investor-relation/meetings",
     icon: "ne",
   },
   //policies
@@ -66,7 +66,7 @@ const menuItems = [
   //misc files- pending
   {
     title: "Stock Exchange Filings",
-    href: "/investor-relation/miscfiles",
+    href: "/investor-relation/stock-exchange",
     icon: "mf",
   },
   //open offer - no data
@@ -88,11 +88,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="w-56 bg-gray-100 text-gray-600 flex flex-col border-r-[1.5px] z-40">
-        <p className="text-2xl text-center font-bold px-3 py-3 border-b border-gray-300 text-black">
-          Spice Lounge
-        </p>
-
+      <div className="w-96 text-gray-600 flex flex-col border-r-[1.5px] z-40">
         <div className="bg-white rounded-xl shadow-sm p-4 lg:col-span-1">
           <ul className="space-y-2">
             {menuItems.map((tab) => (
@@ -106,7 +102,7 @@ export default function Sidebar() {
                       }`}
                 >
                   {/* <img src={tab.img} alt={tab.label} className="w-5 h-5" /> */}
-                  <span className="text-sm">{tab.title}</span>
+                  <span className="text-sm lg:text-lg">{tab.title}</span>
                 </a>
               </li>
             ))}

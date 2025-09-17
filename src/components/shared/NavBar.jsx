@@ -1,28 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuMenu, LuX } from "react-icons/lu";
+import pb from "@/app/(admin)/_lib/pb";
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
+  const [data, setData] = useState({
+    brands: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [brandsRes] = await Promise.all([
+          pb
+            .collection("brands")
+            .getFullList(200, { sort: "sno", requestKey: null }),
+        ]);
+
+        setData({
+          brands: brandsRes,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const links = [
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
-    { name: "Brands", path: "/brands" },
+    { name: "Brands", path: `/brands/${data.brands[0]?.name}` },
     { name: "Franchises", path: "/franchises" },
     { name: "Gallery", path: "/gallery" },
-    { name: "Investor Relation", path: "/investor-relation" },
+    {
+      name: "Investor Relation",
+      path: "/investor-relation/corporate-information",
+    },
     { name: "Contact", path: "/contact" },
   ];
 
-  const getLinkClass = (path) =>
-    pathname === path
-      ? "text-[#d13b2a] font-semibold"
+  const getLinkClass = (path) => {
+    const isActive =
+      pathname === path || // exact match
+      (path.startsWith("/brands") && pathname.startsWith("/brands")) ||
+      (path.startsWith("/gallery") && pathname.startsWith("/gallery"));
+
+    return isActive
+      ? "text-[#d13b2a] font-bold"
       : "text-gray-700 font-semibold hover:text-[#d13b2a]";
+  };
 
   return (
     <nav className="bg-white shadow fixed top-0 w-full z-50">

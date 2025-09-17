@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import React, { useEffect, useState } from "react";
 import pb from "../_lib/pb";
+import OurPortfolioOrc from "../_components/OurPortfolioOrc";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -185,7 +186,8 @@ export default function Footer() {
         </div>
         <div className="col-span-3">
           <h2 className="text-center font-bold">Our Portfolio</h2>
-          <img src="/shared/logos/tree-structure.png" alt="" />
+          {/* <img src="/shared/logos/tree-structure.png" alt="" /> */}
+          <OurPortfolioOrc brands={data.brands} />
         </div>
       </div>
 
@@ -211,9 +213,9 @@ export default function Footer() {
             Disclaimer
           </Link>
           <Link
-            href="/privacy"
+            href="/privacy-policy"
             className={`${
-              pathname === "/privacy"
+              pathname === "/privacy-policy"
                 ? "text-red-400 font-semibold underline"
                 : "hover:underline text-gray-200"
             }`}

@@ -6,6 +6,8 @@ import Footer from "../footer/page";
 import { ArrowRight, MoveRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import pb from "../_lib/pb";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 
 const Home = () => {
@@ -443,7 +445,6 @@ const Home = () => {
               ) : (
                 <p>Loading images...</p>
               )}
-
             </div>
             <div className="flex justify-end">
               <a href="/gallery/images">
@@ -455,7 +456,7 @@ const Home = () => {
           </>
         ) : galactive == "vid" ? (
           <>
-            <div className="max-w-7xl">
+            <div className="mt-4 max-w-7xl">
               {data.videos && data.videos.length > 0 ? (
                 <Slider {...sliderSettings}>
                   {data.videos.map((video) => (
@@ -495,40 +496,49 @@ const Home = () => {
               Explore all of our unique brands across your favourite platform
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
-              {companies.map((company, idx) => (
+              {data.brands.map((brand) => (
                 <div
-                  key={idx}
+                  key={brand.id}
                   className="bg-white border border-yellow-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col items-center"
                 >
                   <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                    {company.name}
+                    {brand.name}
                   </h2>
                   <div className="flex space-x-4 text-2xl text-gray-600">
-                    <a href={company.links.facebook} target="_blank">
+                    <a
+                      href={brand.facebook ? brand.facebook : "#"}
+                      target="_blank"
+                    >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/gallery/facebook.png"
+                        src="/home/so/facebook.png"
                         alt="Facebook"
                       />
                     </a>
-                    <a href={company.links.instagram} target="_blank">
+                    <a
+                      href={brand.instagram ? brand.instagram : "#"}
+                      target="_blank"
+                    >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/gallery/instagram.png"
+                        src="/home/so/instagram.png"
                         alt="Instagram"
                       />
                     </a>
-                    <a href={company.links.google} target="_blank">
+                    <a href={brand.google ? brand.google : "#"} target="_blank">
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/gallery/google-logo.png"
+                        src="/home/so/google-logo.png"
                         alt="Google"
                       />
                     </a>
-                    <a href={company.links.youtube} target="_blank">
+                    <a
+                      href={brand.youtube ? brand.youtube : "#"}
+                      target="_blank"
+                    >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/gallery/youtube.png"
+                        src="/home/so/youtube.png"
                         alt="Google"
                       />
                     </a>
@@ -544,48 +554,73 @@ const Home = () => {
               Order from Our Unique Brands on Your Favorite Delivery Apps
             </p>
             <div className="mt-8 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 w-full">
-              {foodcompanies.map((company, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white border border-yellow-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col items-center"
-                >
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                    {company.name}
-                  </h2>
-                  <div className="flex space-x-4 text-2xl text-gray-600">
-                    {company.name == "Buffalo Wild Wings" ? (
-                      <img
-                        className="h-8 w-8 rounded object-cover"
-                        src="/home/gallery/buffalo.jpg"
-                        alt="swiggy"
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <a href={company.links.swiggy} target="_blank">
-                      <img
-                        className="h-8 w-8 rounded object-cover"
-                        src="/home/gallery/swiggy.jpg"
-                        alt="swiggy"
-                      />
-                    </a>
-                    <a href={company.links.zomato} target="_blank">
-                      <img
-                        className="h-8 w-8 rounded object-cover"
-                        src="/home/gallery/zomato.jpg"
-                        alt="zomato"
-                      />
-                    </a>
-                    <a href={company.links.dunzo} target="_blank">
-                      <img
-                        className="h-8 w-8 rounded object-cover"
-                        src="/home/gallery/dunzo.jpg"
-                        alt="dunzo"
-                      />
-                    </a>
-                  </div>
-                </div>
-              ))}
+              {data.brands.map((brand) => {
+                if (
+                  brand.name.toUpperCase() === "ETOUCH" ||
+                  brand.name.toUpperCase() === "TEKSOFT"
+                ) {
+                  return null; // Skip rendering this brand
+                } else {
+                  return (
+                    <div
+                      key={brand.id}
+                      className="bg-white border border-yellow-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col items-center"
+                    >
+                      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center capitalize">
+                        {brand.name}
+                      </h2>
+                      <div className="flex space-x-4 text-2xl text-gray-600">
+                        {brand.own_delivery_icon ? (
+                          <a
+                            href={brand.own_delivery ? brand.own_delivery : "#"}
+                          >
+                            <img
+                              className="h-8 w-8 rounded object-cover"
+                              src={pb.files.getURL(
+                                brand,
+                                brand.own_delivery_icon
+                              )}
+                              alt="swiggy"
+                            />
+                          </a>
+                        ) : (
+                          <></>
+                        )}
+                        <a
+                          href={brand.swiggy ? brand.swiggy : "#"}
+                          target="_blank"
+                        >
+                          <img
+                            className="h-8 w-8 rounded object-cover"
+                            src="/home/dp/swiggy.jpg"
+                            alt="swiggy"
+                          />
+                        </a>
+                        <a
+                          href={brand.zomato ? brand.zomato : "#"}
+                          target="_blank"
+                        >
+                          <img
+                            className="h-8 w-8 rounded object-cover"
+                            src="/home/dp/zomato.jpg"
+                            alt="zomato"
+                          />
+                        </a>
+                        <a
+                          href={brand.dunzo ? brand.dunzo : "#"}
+                          target="_blank"
+                        >
+                          <img
+                            className="h-8 w-8 rounded object-cover"
+                            src="/home/dp/dunzo.jpg"
+                            alt="dunzo"
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                }
+              })}
             </div>
           </div>
         ) : (

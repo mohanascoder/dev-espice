@@ -1,416 +1,439 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import Slider from "react-slick";
-import Modal from "react-modal";
-import axios from "axios";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import NavBar from "@/components/shared/NavBar";
 import Footer from "../footer/page";
-
-// Dummy social media data – replace with actual links and icons as needed
-const socialMediaLinks = [
-  {
-    name: "Buffalo Wild Wings",
-    links: {
-      facebook: "https://www.facebook.com/BWWingsIndia/",
-      instagram: "https://www.instagram.com/bwwingsindia",
-      google: "#",
-      youtube: " https://www.youtube.com/@buffalowildwingsindia ",
-    },
-  },
-  {
-    name: "Wing Zone",
-    links: {
-      facebook: "#",
-      instagram: "#",
-      google: "#",
-      youtube: "#",
-    },
-  },
-  {
-    name: "Blaze Kebabs",
-    links: {
-      facebook: "https://www.facebook.com/profile.php?id=61577000966469 ",
-      instagram: "https://www.instagram.com/blazekebabs/ ",
-      google: "#",
-      youtube: "https://www.youtube.com/@BlazeKebabs",
-    },
-  },
-  {
-    name: "eTouch",
-    links: {
-      facebook: "#",
-      instagram: "#",
-      google: "#",
-      youtube: "#",
-    },
-  },
-  {
-    name: "Xora",
-    links: {
-      facebook: "https://www.facebook.com/XoraHyd",
-      instagram: "https://www.instagram.com/xorahyd/",
-      google: "https://share.google/t4zOyzkavdDzviy4X",
-      youtube: "#",
-    },
-  },
-  {
-    name: "Salud",
-    links: {
-      facebook: "https://www.facebook.com/goasalud",
-      instagram: "https://www.instagram.com/saludgoa/",
-      google: "https://share.google/K4Q8oEnQ31UcIFirr",
-      youtube: "#",
-    },
-  },
-  {
-    name: "Sunburn Union",
-    links: {
-      facebook: "https://www.facebook.com/SunburnUnionBengaluru",
-      instagram: "https://www.instagram.com/sunburnunionbengaluru/",
-      google: "https://share.google/X10s1XPGhlqCZAKcS",
-      youtube: "#",
-    },
-  },
-  {
-    name: "Teksoft",
-    links: {
-      facebook: "#",
-      instagram: "#",
-      google: "#",
-      youtube: "#",
-    },
-  },
-];
-
-
-
-
-const fb = "/path/to/facebook-icon.png"; // Replace with your actual image paths
-const In = "/path/to/instagram-icon.png"; // Replace with your actual image paths
-const Yt = "/path/to/youtube-icon.png"; // Replace with your actual image paths
-
-const foodcompanies = [
-  { name: "Buffalo Wild Wings" },
-  { name: "Wing Zone" },
-  { name: "Blaze Kebabs" },
-  { name: "Xora" },
-  { name: "Salud" },
-  { name: "Sunburn Union" },
-];
-
+import pb from "../_lib/pb";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { ArrowRight, X } from "lucide-react";
 
 const Gallery = () => {
-  const pathname = usePathname();
-  const [gallery, setGallery] = useState([]);
-  const [activeTab, setActiveTab] = useState("images");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImages, setModalImages] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch gallery data from API
-  useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const response = await axios.get(
-          "http://72.60.96.63/api/collections/gallery/records"
-        );
-        setGallery(response.data.items || []);
-      } catch (error) {
-        console.error("Error fetching gallery:", error);
-      }
-    };
-    fetchGallery();
-  }, []);
+  const [imgFade, setImgFade] = useState(false);
+  const [imgOpen, setImgOpen] = useState("");
 
-  // Check if URL includes #socialmedia
+  const [videoOpen, setVideoOpen] = useState("");
+  const [videoFade, setVideoFade] = useState(false);
+
+  useEffect(() => setVideoFade(!!videoOpen), [videoOpen]);
+
+  // Trigger fade when image modal opens
   useEffect(() => {
-    if (pathname && pathname.includes("#socialmedia")) {
-      setActiveTab("socialmedia");
+    if (imgOpen) {
+      setImgFade(true);
+    } else {
+      setImgFade(false);
     }
-  }, [pathname]);
+  }, [imgOpen]);
 
-  // Filter active images and videos
-  const imageItems = gallery.filter(
-    (item) => item.active && item.type === "image" && item.image
-  );
+  const [data, setData] = useState({
+    banners: [],
+    brands: [],
+    images: [],
+    videos: [],
+  });
 
-  const videoItems = gallery.filter(
-    (item) => item.active && item.type === "video" && item.video
-  );
-
-  // Slider settings for both galleries
   const sliderSettings = {
     autoplay: true,
     dots: false,
     infinite: true,
     autoplaySpeed: 2500,
     speed: 1000,
-    slidesToShow: 5,
+    slidesToShow: 5, // Default for desktop
     slidesToScroll: 1,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 768, settings: { slidesToShow: 1 } },
+      {
+        breakpoint: 1024,
+        settings: { slidesToShow: 2 },
+      },
+      {
+        breakpoint: 768,
+        settings: { slidesToShow: 1 },
+      },
     ],
   };
 
-  const modalSliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    initialSlide: currentSlide,
-  };
+  const [galactive, setGalactive] = useState("img");
 
-  // Handle image click to open modal
-  const handleImageClick = (clickedItem) => {
-    const images = imageItems.map(
-      (item) =>
-        `http://72.60.96.63/api/files/${item.collectionId}/${item.id}/${item.image}`
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bannersRes, brandsRes, imagesRes, videosRes] = await Promise.all(
+          [
+            pb.collection("banners").getFullList(200, {
+              sort: "sno",
+              filter: 'page = "gallery"',
+              requestKey: null,
+            }),
+            pb
+              .collection("brands")
+              .getFullList(200, { sort: "sno", requestKey: null }),
+            pb.collection("gallery").getFullList(200, {
+              sort: "sno",
+              filter: 'type = "image"',
+              requestKey: null,
+            }),
+            pb.collection("gallery").getFullList(200, {
+              sort: "sno",
+              filter: 'type = "video"',
+              requestKey: null,
+            }),
+          ]
+        );
+
+        setData({
+          banners: bannersRes.map((item) => pb.files.getURL(item, item.image)),
+          brands: brandsRes,
+          images: imagesRes,
+          videos: videosRes,
+        });
+
+        console.log({
+          banners: bannersRes,
+          brands: brandsRes,
+          images: imagesRes,
+          videos: videosRes,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading)
+    return (
+      <>
+        <div className="h-dvh w-dvw flex justify-center items-center">
+          <div className="w-20 h-20 border-4 border-gray-300 border-t-4 border-t-[#152768] rounded-full animate-spin"></div>
+        </div>
+      </>
     );
-    const index = imageItems.findIndex((item) => item.id === clickedItem.id);
-    setModalImages(images);
-    setCurrentSlide(index);
-    setIsModalOpen(true);
-  };
 
   return (
     <div>
       <NavBar />
-      <div className="mt-16 max-w-7xl mx-auto">
-        <section className="xl:py-5 bg-white overflow-hidden">
-          <div className="p-8 lg:p-5">
-            <h2 className="text-xl uppercase text-[#223972] lg:text-4xl font-semibold text-center lg:py-5">
-              Gallery
-            </h2>
+      <div className="mt-16 max-w-7xl mx-auto mb-4">
+        <img className="w-full" src={data.banners[0]} alt={data.banners.page} />
+      </div>
+      {/* Gallery */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <h2 className="text-[#152768] text-2xl font-bold text-center">
+          GALLERY
+        </h2>
+        <div className="flex flex-wrap justify-center items-center gap-2 mt-4">
+          <div
+            className={
+              galactive == "img"
+                ? "bg-[#152768] text-white px-3 py-2 rounded cursor-pointer"
+                : "hover:bg-[#152768] hover:text-white px-3 py-2 rounded border border-[#152768] cursor-pointer"
+            }
+            onClick={() => {
+              setGalactive("img");
+            }}
+          >
+            Images
+          </div>
+          <div
+            className={
+              galactive == "vid"
+                ? "bg-[#152768] text-white px-3 py-2 rounded cursor-pointer"
+                : "hover:bg-[#152768] hover:text-white px-3 py-2 rounded border border-[#152768] cursor-pointer"
+            }
+            onClick={() => {
+              setGalactive("vid");
+            }}
+          >
+            Videos
+          </div>
+          <div
+            className={
+              galactive == "soc"
+                ? "bg-[#152768] text-white px-3 py-2 rounded cursor-pointer"
+                : "hover:bg-[#152768] hover:text-white px-3 py-2 rounded border border-[#152768] cursor-pointer"
+            }
+            onClick={() => {
+              setGalactive("soc");
+            }}
+          >
+            Social Media
+          </div>
+          <div
+            className={
+              galactive == "del"
+                ? "bg-[#152768] text-white px-3 py-2 rounded cursor-pointer"
+                : "hover:bg-[#152768] hover:text-white px-3 py-2 rounded border border-[#152768] cursor-pointer"
+            }
+            onClick={() => {
+              setGalactive("del");
+            }}
+          >
+            Delivery Platforms
+          </div>
+        </div>
 
-            <div className="flex justify-center">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 lg:gap-4 mt-4 mb-6">
-                <Button
-                  onClick={() => setActiveTab("images")}
-                  className={`border-2 transition-colors duration-200 ${
-                    activeTab === "images"
-                      ? "bg-[#223972] text-white"
-                      : "bg-white text-[#223972] hover:bg-[#223972] hover:text-white"
-                  } border-[#223972]`}
-                >
-                  Images
-                </Button>
-                <Button
-                  onClick={() => setActiveTab("videos")}
-                  className={`border-2 transition-colors duration-200 ${
-                    activeTab === "videos"
-                      ? "bg-[#223972] text-white"
-                      : "bg-white text-[#223972] hover:bg-[#223972] hover:text-white"
-                  } border-[#223972]`}
-                >
-                  Videos
-                </Button>
-                <Button
-                  onClick={() => setActiveTab("socialmedia")}
-                  className={`border-2 transition-colors duration-200 ${
-                    activeTab === "socialmedia"
-                      ? "bg-[#223972] text-white"
-                      : "bg-white text-[#223972] hover:bg-[#223972] hover:text-white"
-                  } border-[#223972]`}
-                >
-                  Social Media
-                </Button>
-                <Button
-                  onClick={() => setActiveTab("deliveryPlatform")}
-                  className={`border-2 transition-colors duration-200 ${
-                    activeTab === "deliveryPlatform"
-                      ? "bg-[#223972] text-white"
-                      : "bg-white text-[#223972] hover:bg-[#223972] hover:text-white"
-                  } border-[#223972]`}
-                >
-                  Delivery Platforms
-                </Button>
-              </div>
-            </div>
-
-            {/* Images Slider */}
-            {activeTab === "images" && (
-              <Slider {...sliderSettings}>
-                {imageItems.map((item, idx) => (
-                  <div key={idx} className="p-2">
+        {galactive == "img" ? (
+          <>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {data.images && data.images.length > 0 ? (
+                data.images.map((image) => (
+                  <div
+                    key={image.id}
+                    className="flex items-center justify-center border border-gray-300 rounded-2xl"
+                  >
                     <img
-                      src={`http://72.60.96.63/api/files/${item.collectionId}/${item.id}/${item.image}`}
-                      alt={`Gallery Image ${idx}`}
-                      className="w-full h-64 object-cover rounded-md cursor-pointer"
-                      onClick={() => handleImageClick(item)}
+                      src={pb.files.getURL(image, image.image)}
+                      className="object-cover w-full h-64"
+                      alt="preview"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImgOpen(
+                          `${pb.files.getURL(image, image.image)}?thumb=1024x0`
+                        );
+                      }}
                     />
                   </div>
-                ))}
-              </Slider>
-            )}
-
-            {/* Videos Slider */}
-            {activeTab === "videos" && (
-              <div className="w-full px-4 py-6">
-                {videoItems.length > 0 ? (
-                  <Slider {...sliderSettings}>
-                    {videoItems.map((item, idx) => (
-                      <div key={idx} className="p-2">
-                        <video
-                          controls
-                          className="w-full h-64 object-cover rounded-md"
-                          crossOrigin="anonymous"
-                        >
-                          <source
-                            src={`http://72.60.96.63/api/files/${item.collectionId}/${item.id}/${item.video}`}
-                            type="video/mp4"
-                          />
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    ))}
-                  </Slider>
-                ) : (
-                  <p className="text-center text-gray-500 text-lg">
-                    Loading...
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Social Media Section */}
-            {activeTab === "socialmedia" && (
-              <section id="socialmedia">
-                <div className="flex flex-col justify-center items-center py-6">
-                  <h2 className="text-4xl font-semibold">Follow Our Brands</h2>
-                  <p className="pt-4">
-                    Explore all of our unique brands across your favourite
-                    platforms.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
-                    {socialMediaLinks.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="group border-2 cursor-pointer p-10 space-y-7 shadow-lg rounded-xl border-amber-200 hover:border-[#e23130] transition-all duration-300 ease-in-out transform hover:scale-100 hover:shadow-md"
+                ))
+              ) : (
+                <p>Loading images...</p>
+              )}
+            </div>
+          </>
+        ) : galactive == "vid" ? (
+          <>
+            <div className="mt-4 max-w-7xl">
+              {data.videos && data.videos.length > 0 ? (
+                <Slider {...sliderSettings}>
+                  {data.videos.map((video) => (
+                    <div key={video.id} className="px-2">
+                      <video
+                        className="w-full h-64 object-cover rounded-md"
+                        crossOrigin="anonymous"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setVideoOpen(pb.files.getURL(video, video.video));
+                        }}
                       >
-                        <h4 className="text-center text-xl font-semibold">
-                          {item.name}
-                        </h4>
-                        <div className="flex gap-x-7 justify-center">
-                          <a
-                            href={item.links.facebook}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <img
-                              src={fb}
-                              alt="facebook"
-                              className="h-7 w-7 transition-all duration-300 ease-in-out transform hover:scale-125 hover:shadow-md"
-                            />
-                          </a>
-                          <a
-                            href={item.links.instagram}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <img
-                              src={In}
-                              alt="instagram"
-                              className="h-7 w-7 transition-all duration-300 ease-in-out transform hover:scale-125 hover:shadow-md"
-                            />
-                          </a>
-                          <a
-                            href={item.links.youtube}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <img
-                              src={Yt}
-                              alt="youtube"
-                              className="h-7 w-7 transition-all duration-300 ease-in-out transform hover:scale-125 hover:shadow-md"
-                            />
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Delivery platform */}
-            {activeTab === "deliveryPlatform" ? (
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <h2 className="text-2xl text-center">
-                  Order Your Favourite Food
-                </h2>
-                <p className="text-center">
-                  Order from Our Unique Brands on Your Favorite Delivery Apps
-                </p>
-                <div className="mt-8 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 w-full">
-                  {foodcompanies.map((company, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white border border-yellow-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col items-center"
-                    >
-                      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                        {company.name}
-                      </h2>
-                      <div className="flex space-x-4 text-2xl text-gray-600">
-                        <img
-                          className="h-6 w-6 rounded object-cover"
-                          src="/home/gallery/zomato.jpg"
-                          alt="zomato"
+                        <source
+                          src={pb.files.getURL(video, video.video)}
+                          type="video/mp4"
                         />
-                        <img
-                          className="h-6 w-6 rounded object-cover"
-                          src="/home/gallery/swiggy.jpg"
-                          alt="swiggy"
-                        />
-                        <img
-                          className="h-6 w-6 rounded object-cover"
-                          src="/home/gallery/dunzo.jpg"
-                          alt="dunzo"
-                        />
-                      </div>
+                        Your browser does not support the video tag.
+                      </video>
                     </div>
                   ))}
+                </Slider>
+              ) : (
+                <p>Loading videos...</p>
+              )}
+            </div>
+          </>
+        ) : galactive == "soc" ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h2 className="text-2xl text-center">Follow Our brands</h2>
+            <p className="text-center my-4">
+              Explore all of our unique brands across your favourite platform
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+              {data.brands.map((brand) => (
+                <div
+                  key={brand.id}
+                  className="bg-white border border-yellow-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col items-center"
+                >
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                    {brand.name}
+                  </h2>
+                  <div className="flex space-x-4 text-2xl text-gray-600">
+                    <a
+                      href={brand.facebook ? brand.facebook : "#"}
+                      target="_blank"
+                    >
+                      <img
+                        className="h-6 w-6 rounded object-cover hover:scale-110"
+                        src="/home/so/facebook.png"
+                        alt="Facebook"
+                      />
+                    </a>
+                    <a
+                      href={brand.instagram ? brand.instagram : "#"}
+                      target="_blank"
+                    >
+                      <img
+                        className="h-6 w-6 rounded object-cover hover:scale-110"
+                        src="/home/so/instagram.png"
+                        alt="Instagram"
+                      />
+                    </a>
+                    <a href={brand.google ? brand.google : "#"} target="_blank">
+                      <img
+                        className="h-6 w-6 rounded object-cover hover:scale-110"
+                        src="/home/so/google-logo.png"
+                        alt="Google"
+                      />
+                    </a>
+                    <a
+                      href={brand.youtube ? brand.youtube : "#"}
+                      target="_blank"
+                    >
+                      <img
+                        className="h-6 w-6 rounded object-cover hover:scale-110"
+                        src="/home/so/youtube.png"
+                        alt="Google"
+                      />
+                    </a>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              ""
-            )}
+              ))}
+            </div>
           </div>
-        </section>
-
-        {/* Modal with Carousel */}
-        <Modal
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
-          contentLabel="Image Modal"
-          className="max-w-3xl mx-auto mt-20 bg-white p-4 rounded-md outline-none"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
-        >
-          <button
-            onClick={() => setIsModalOpen(false)}
-            className="mb-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Close
-          </button>
-          <Slider {...modalSliderSettings}>
-            {modalImages.map((img, idx) => (
-              <div key={idx}>
-                <img
-                  src={img}
-                  alt={`Modal Image ${idx}`}
-                  className="w-full h-[500px] object-contain"
-                />
-              </div>
-            ))}
-          </Slider>
-        </Modal>
+        ) : galactive == "del" ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h2 className="text-2xl text-center">Order Your Favourite Food</h2>
+            <p className="text-center">
+              Order from Our Unique Brands on Your Favorite Delivery Apps
+            </p>
+            <div className="mt-8 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 w-full">
+              {data.brands.map((brand) => {
+                if (
+                  brand.name.toUpperCase() === "ETOUCH" ||
+                  brand.name.toUpperCase() === "TEKSOFT"
+                ) {
+                  return null; // Skip rendering this brand
+                } else {
+                  return (
+                    <div
+                      key={brand.id}
+                      className="bg-white border border-yellow-300 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col items-center"
+                    >
+                      <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center capitalize">
+                        {brand.name}
+                      </h2>
+                      <div className="flex space-x-4 text-2xl text-gray-600">
+                        {brand.own_delivery_icon ? (
+                          <a
+                            href={brand.own_delivery ? brand.own_delivery : "#"}
+                          >
+                            <img
+                              className="h-8 w-8 rounded object-cover"
+                              src={pb.files.getURL(
+                                brand,
+                                brand.own_delivery_icon
+                              )}
+                              alt="swiggy"
+                            />
+                          </a>
+                        ) : (
+                          <></>
+                        )}
+                        <a
+                          href={brand.swiggy ? brand.swiggy : "#"}
+                          target="_blank"
+                        >
+                          <img
+                            className="h-8 w-8 rounded object-cover"
+                            src="/home/dp/swiggy.jpg"
+                            alt="swiggy"
+                          />
+                        </a>
+                        <a
+                          href={brand.zomato ? brand.zomato : "#"}
+                          target="_blank"
+                        >
+                          <img
+                            className="h-8 w-8 rounded object-cover"
+                            src="/home/dp/zomato.jpg"
+                            alt="zomato"
+                          />
+                        </a>
+                        <a
+                          href={brand.dunzo ? brand.dunzo : "#"}
+                          target="_blank"
+                        >
+                          <img
+                            className="h-8 w-8 rounded object-cover"
+                            src="/home/dp/dunzo.jpg"
+                            alt="dunzo"
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
+      {imgOpen && (
+        <div
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${
+            imgFade ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setImgOpen("")}
+        >
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className={`relative rounded w-[80dvw] md:w-auto md:h-[60dvh] transform transition-transform duration-100 ${
+              imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+            }`}
+          >
+            <img
+              src={imgOpen}
+              alt="preview"
+              className="w-full h-full object-contain"
+            />
+
+            <button
+              onClick={() => setImgOpen("")}
+              className="absolute top-0 right-0 p-1 rounded-bl-xl bg-red-600 text-white"
+            >
+              <X />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Preview */}
+      {videoOpen && (
+        <div
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/40 transition-opacity duration-100 ${
+            videoFade ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setVideoOpen("")}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`relative rounded w-[80dvw] md:w-auto md:h-[70dvh] transform transition-transform duration-100 ${
+              videoFade
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-5 opacity-0"
+            }`}
+          >
+            <video
+              src={videoOpen}
+              controls
+              className="w-full h-full object-contain"
+            />
+
+            <button
+              onClick={() => setVideoOpen("")}
+              className="absolute top-0 right-0 p-1 rounded-bl-xl bg-red-600 text-white"
+            >
+              <X />
+            </button>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );
