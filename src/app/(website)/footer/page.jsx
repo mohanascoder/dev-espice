@@ -185,7 +185,7 @@ export default function Footer() {
         </div>
         <div className="col-span-3">
           <h2 className="text-center font-bold">Our Portfolio</h2>
-          <img src="/shared/logos/tree-structure.png" alt="" />
+          <img src="/images/shared/logos/tree-structure.png" alt="" />
         </div>
       </div>
 

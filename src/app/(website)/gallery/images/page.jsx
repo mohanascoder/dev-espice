@@ -1,12 +1,37 @@
 "use client";
-import NavBar from "@/components/shared/NavBar";
+
 import React, { useEffect, useState } from "react";
-import Footer from "../footer/page";
-import pb from "../_lib/pb";
-import { ArrowRight } from "lucide-react";
+import NavBar from "@/components/shared/NavBar";
+import Footer from "../../footer/page";
+import dynamic from "next/dynamic"; // ⬅️ add this
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import pb from "../../_lib/pb";
+
+// Dynamically import Slider so it only runs on the client
+const Slider = dynamic(() => import("react-slick"), { ssr: false });
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const Gallery = () => {
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(null);
+
+  const [imgFade, setImgFade] = useState(false);
+  const [imgOpen, setImgOpen] = useState("");
+
+  const [videoOpen, setVideoOpen] = useState("");
+  const [videoFade, setVideoFade] = useState(false);
+
+  useEffect(() => setVideoFade(!!videoOpen), [videoOpen]);
+
+  // Trigger fade when image modal opens
+  useEffect(() => {
+    if (imgOpen) {
+      setImgFade(true);
+    } else {
+      setImgFade(false);
+    }
+  }, [imgOpen]);
 
   const [data, setData] = useState({
     banners: [],
@@ -14,6 +39,36 @@ const Gallery = () => {
     images: [],
     videos: [],
   });
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    if (data.images.length === 0) return;
+
+    const newIndex =
+      currentIndex === 0 ? data.images.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+    setImgOpen(
+      `${pb.files.getURL(
+        data.images[newIndex],
+        data.images[newIndex].image
+      )}?thumb=1024x0`
+    );
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    if (data.images.length === 0) return;
+
+    const newIndex =
+      currentIndex === data.images.length - 1 ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+    setImgOpen(
+      `${pb.files.getURL(
+        data.images[newIndex],
+        data.images[newIndex].image
+      )}?thumb=1024x0`
+    );
+  };
 
   const sliderSettings = {
     autoplay: true,
@@ -94,12 +149,14 @@ const Gallery = () => {
         </div>
       </>
     );
+
   return (
-    <>
+    <div>
       <NavBar />
-      <div className="mt-16 max-w-7xl mx-auto">
-        <img src={data.banners[0]} alt="" />
+      <div className="mt-16 max-w-7xl mx-auto mb-4">
+        <img className="w-full" src={data.banners[0]} alt={data.banners.page} />
       </div>
+      {/* Gallery */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <h2 className="text-[#152768] text-2xl font-bold text-center">
           GALLERY
@@ -160,15 +217,25 @@ const Gallery = () => {
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {data.images && data.images.length > 0 ? (
                 data.images.map((image) => (
-                  <a href="/gallery/images" key={image.id}>
-                    <div className="flex items-center justify-center border border-gray-300 rounded-2xl">
-                      <img
-                        className="object-cover w-full h-64"
-                        src={pb.files.getURL(image, image.image)}
-                        alt={image.name || "Brand"}
-                      />
-                    </div>
-                  </a>
+                  <div
+                    key={image.id}
+                    className="flex items-center justify-center border border-gray-300 rounded-2xl"
+                  >
+                    <img
+                      src={pb.files.getURL(image, image.image)}
+                      className="object-cover w-full h-64"
+                      alt="preview"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentIndex(
+                          data.images.findIndex((img) => img.id === image.id)
+                        );
+                        setImgOpen(
+                          `${pb.files.getURL(image, image.image)}?thumb=1024x0`
+                        );
+                      }}
+                    />
+                  </div>
                 ))
               ) : (
                 <p>Loading images...</p>
@@ -177,24 +244,26 @@ const Gallery = () => {
           </>
         ) : galactive == "vid" ? (
           <>
-            <div className="max-w-7xl mt-4">
+            <div className="mt-4 max-w-7xl">
               {data.videos && data.videos.length > 0 ? (
                 <Slider {...sliderSettings}>
                   {data.videos.map((video) => (
-                    <a href="/gallery/videos" key={video.id}>
-                      <div key={video.id} className="px-2">
-                        <video
-                          className="w-full h-64 object-cover rounded-md"
-                          crossOrigin="anonymous"
-                        >
-                          <source
-                            src={pb.files.getURL(video, video.video)}
-                            type="video/mp4"
-                          />
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    </a>
+                    <div key={video.id} className="px-2">
+                      <video
+                        className="w-full h-64 object-cover rounded-md"
+                        crossOrigin="anonymous"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setVideoOpen(pb.files.getURL(video, video.video));
+                        }}
+                      >
+                        <source
+                          src={pb.files.getURL(video, video.video)}
+                          type="video/mp4"
+                        />
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
                   ))}
                 </Slider>
               ) : (
@@ -224,7 +293,7 @@ const Gallery = () => {
                     >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/home/so/facebook.png"
+                        src="/images/home/so/facebook.png"
                         alt="Facebook"
                       />
                     </a>
@@ -234,14 +303,14 @@ const Gallery = () => {
                     >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/home/so/instagram.png"
+                        src="/images/home/so/instagram.png"
                         alt="Instagram"
                       />
                     </a>
                     <a href={brand.google ? brand.google : "#"} target="_blank">
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/home/so/google-logo.png"
+                        src="/images/home/so/google-logo.png"
                         alt="Google"
                       />
                     </a>
@@ -251,7 +320,7 @@ const Gallery = () => {
                     >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/home/so/youtube.png"
+                        src="/images/home/so/youtube.png"
                         alt="Google"
                       />
                     </a>
@@ -305,7 +374,7 @@ const Gallery = () => {
                         >
                           <img
                             className="h-8 w-8 rounded object-cover"
-                            src="/home/dp/swiggy.jpg"
+                            src="/images/home/dp/swiggy.jpg"
                             alt="swiggy"
                           />
                         </a>
@@ -315,7 +384,7 @@ const Gallery = () => {
                         >
                           <img
                             className="h-8 w-8 rounded object-cover"
-                            src="/home/dp/zomato.jpg"
+                            src="/images/home/dp/zomato.jpg"
                             alt="zomato"
                           />
                         </a>
@@ -325,7 +394,7 @@ const Gallery = () => {
                         >
                           <img
                             className="h-8 w-8 rounded object-cover"
-                            src="/home/dp/dunzo.jpg"
+                            src="/images/home/dp/dunzo.jpg"
                             alt="dunzo"
                           />
                         </a>
@@ -340,8 +409,107 @@ const Gallery = () => {
           <></>
         )}
       </div>
+      {imgOpen && (
+        <div
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/80 transition-opacity duration-100 ${
+            imgFade ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setImgOpen("")}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`relative flex items-center justify-center rounded w-[80dvw] md:w-[85dvw] md:h-[90dvh] transform transition-transform duration-100 ${
+              imgFade ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+            }`}
+          >
+            {/* Prev Button */}
+            <button
+              onClick={handlePrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 text-white px-3 py-2 rounded-r-lg cursor-pointer"
+            >
+              <ChevronLeft size={64} />
+            </button>
+
+            {/* Image */}
+            <img
+              src={imgOpen}
+              alt="preview"
+              className="w-full h-full object-contain"
+            />
+
+            {/* Next Button */}
+            <button
+              onClick={handleNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 text-white px-3 py-2 rounded-l-lg cursor-pointer"
+            >
+              <ChevronRight size={64} />
+            </button>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setImgOpen("")}
+              className="absolute top-0 right-8 p-1 rounded-bl-xl bg-red-600 text-white cursor-pointer"
+            >
+              <X />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Preview */}
+      {videoOpen && (
+        <div
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-black/80 transition-opacity duration-100 ${
+            videoFade ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setVideoOpen("")}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`relative flex items-center justify-center rounded w-[80dvw] md:w-[85dvw] md:h-[90dvh] transform transition-transform duration-100 ${
+              videoFade
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-5 opacity-0"
+            }`}
+            // className={`relative rounded w-[80dvw] md:w-auto md:h-[70dvh] transform transition-transform duration-100 ${
+            //   videoFade
+            //     ? "translate-y-0 opacity-100"
+            //     : "-translate-y-5 opacity-0"
+            // }`}
+          >
+            {/* Prev Button */}
+            <button
+              onClick={handlePrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 text-white px-3 py-2 rounded-r-lg cursor-pointer"
+            >
+              <ChevronLeft size={64} />
+            </button>
+
+            <video
+              src={videoOpen}
+              controls
+              className="w-full h-full object-contain"
+            />
+
+            {/* Next Button */}
+            <button
+              onClick={handleNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 text-white px-3 py-2 rounded-l-lg cursor-pointer"
+            >
+              <ChevronRight size={64} />
+            </button>
+
+            <button
+              onClick={() => setVideoOpen("")}
+              className="absolute top-0 right-8 p-1 rounded-bl-xl bg-red-600 text-white"
+            >
+              <X />
+            </button>
+          </div>
+        </div>
+      )}
       <Footer />
-    </>
+    </div>
   );
 };
 

@@ -1,65 +1,104 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuMenu, LuX } from "react-icons/lu";
+import pb from "@/app/(admin)/_lib/pb";
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
+  const [data, setData] = useState({
+    brands: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [brandsRes] = await Promise.all([
+          pb
+            .collection("brands")
+            .getFullList(200, { sort: "sno", requestKey: null }),
+        ]);
+
+        setData({
+          brands: brandsRes,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const links = [
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
-    { name: "Brands", path: "/brands" },
+    { name: "Brands", path: `/brands/${data.brands[0]?.name}` },
     { name: "Franchises", path: "/franchises" },
-    { name: "Gallery", path: "/gallery" },
-    { name: "Investor Relation", path: "/investor-relation" },
+    { name: "Gallery", path: "/gallery/images" },
+    {
+      name: "Investor Relation",
+      path: "/investor-relation/corporate-information",
+    },
     { name: "Contact", path: "/contact" },
   ];
 
-  const getLinkClass = (path) =>
-    pathname === path
-      ? "text-[#d13b2a] font-semibold"
+  const getLinkClass = (path) => {
+    const isActive =
+      pathname === path || // exact match
+      (path.startsWith("/brands") && pathname.startsWith("/brands")) ||
+      (path.startsWith("/gallery") && pathname.startsWith("/gallery"));
+
+    return isActive
+      ? "text-[#d13b2a] font-bold"
       : "text-gray-700 font-semibold hover:text-[#d13b2a]";
+  };
 
   return (
-    <nav className="bg-white shadow fixed top-0 w-full z-50">
-      <div className="flex justify-between h-16 items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 w-full z-50 bg-orange-50 h-18">
+      <div className="fixed top-6 px-4 sm:px-6 lg:px-8 w-full bg-white">
         {/* Logo and Stock Link */}
-        <div className="flex gap-4 md:gap-8 items-center">
+        <div className="flex justify-between items-center h-12">
           <Link href="/">
-            <img className="h-14" src="/images/logo.png" alt="Logo" />
+            <img
+              className="h-24 rounded-lg border-1 border-black"
+              src="/images/logo.png"
+              alt="Logo"
+            />
             {/* You could use next/image here if desired */}
           </Link>
 
-          <Link href="/investor" className="text-[12px]">
-            <span className="text-[#d13b2a]">SPICELOUNG: </span>
-            <span>Click here for stock price</span>
+          <Link href="/investor-relation/livestock" className="text-[12px]">
+            <span className="font-bold border border-[#223a6c] text-[#223a6c] rounded py-0.5 px-3">
+              Click here for stock price
+            </span>
           </Link>
-        </div>
 
-        {/* Desktop Menu */}
-        <ul className="hidden lg:flex space-x-6 uppercase">
-          {links.map((link) => (
-            <li key={link.name}>
-              <Link href={link.path} className={getLinkClass(link.path)}>
-                {link.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+          {/* Desktop Menu */}
+          <ul className="hidden lg:flex space-x-6 uppercase">
+            {links.map((link) => (
+              <li key={link.name}>
+                <Link href={link.path} className={getLinkClass(link.path)}>
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-        {/* Mobile Hamburger */}
-        <div className="lg:hidden">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="text-gray-700 focus:outline-none text-2xl"
-            aria-label="Toggle menu"
-          >
-            <LuMenu />
-          </button>
+          {/* Mobile Hamburger */}
+          <div className="lg:hidden">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-700 focus:outline-none text-2xl"
+              aria-label="Toggle menu"
+            >
+              <LuMenu />
+            </button>
+          </div>
         </div>
       </div>
 

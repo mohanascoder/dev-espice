@@ -1,20 +1,28 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import pb from "../../_lib/pb";
-import Accordion from "../../_components/Accordion";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const Meetings = () => {
-  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [meetingsInfo, setMeetingsInfo] = useState([]);
+  const [openIndex, setOpenIndex] = useState(null); // accordion state
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await pb.collection("meetings").getFullList(200, {
-          sort: "sno",
-          requestKey: null,
-        });
-        setData(res);
+        const meetingsInfoRes = await pb
+          .collection("meetings_policies_stock_exchange_open_offer")
+          .getFullList(200, {
+            sort: "sno",
+            filter: 'page = "meetings"',
+            requestKey: null,
+          });
+
+        setMeetingsInfo(meetingsInfoRes);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -27,22 +35,75 @@ const Meetings = () => {
 
   if (loading)
     return (
-      <div className="h-full w-full flex justify-center items-center">
-        <div className="w-20 h-20 border-4 border-gray-300 border-t-4 border-t-[#152768] rounded-full animate-spin"></div>
+      <div className="h-screen w-full flex justify-center items-center bg-gray-50">
+        <div className="w-16 h-16 border-4 border-gray-300 border-t-4 border-t-blue-700 rounded-full animate-spin"></div>
       </div>
     );
 
+  const isActive = pathname === "/investor-relation/meetings";
+
+  // toggle accordion
+  const toggleAccordion = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
   return (
-    <div>
-      <div className="px-4">
-        <h2 className="text-2xl text-[#223972] mt-3 font-semibold text-center">
-          Meetings
-        </h2>
-      </div>
-      <div className="overflow-x-auto p-4">
-        <Accordion items={data} />
-      </div>
-    </div>
+    <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {isActive && meetingsInfo.length > 0 && (
+        <>
+          <header className="mb-8 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#223972] border-b-2 border-gray-300 pb-2 inline-block">
+              Meetings
+            </h2>
+          </header>
+
+          <div className="space-y-4">
+            {meetingsInfo.map((info, index) => {
+              const fileUrl = pb.files.getURL(info, info.file);
+
+              return (
+                <div
+                  key={info.id}
+                  className="border rounded-lg shadow-sm overflow-hidden"
+                >
+                  {/* Accordion Header */}
+                  <button
+                    onClick={() => toggleAccordion(index)}
+                    className="w-full flex justify-between items-center px-4 py-3 text-left font-semibold text-lg bg-white hover:bg-gray-50"
+                  >
+                    <span>{info.title}</span>
+                    {openIndex === index ? (
+                      <ChevronUp className="text-gray-600" />
+                    ) : (
+                      <ChevronDown className="text-gray-600" />
+                    )}
+                  </button>
+
+                  {/* Accordion Content */}
+                  {openIndex === index && (
+                    <div className="bg-gray-50 px-4 py-3">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border">
+                        <span className="truncate text-gray-800 font-medium">
+                          {info.title}
+                        </span>
+                        <a
+                          href={fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-600 font-medium hover:text-red-800"
+                        >
+                          Download
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </section>
   );
 };
 
