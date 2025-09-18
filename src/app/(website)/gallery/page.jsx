@@ -4,8 +4,6 @@ import React, { useEffect, useState } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import Modal from "react-modal";
-import axios from "axios";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import NavBar from "@/components/shared/NavBar";
