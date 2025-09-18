@@ -220,7 +220,7 @@ const Home = () => {
           </a>
         </div>
       </section>
-      {/* our brands */}
+      {/* our brands sections*/}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center">
         <h2 className="text-xl lg:text-2xl font-bold mb-4 tracking-wide">
           <span className="text-[#d13b2a]">OUR </span>
