@@ -90,7 +90,7 @@ const Gallery = () => {
     ],
   };
 
-  const [galactive, setGalactive] = useState("img");
+  const [galactive, setGalactive] = useState("vid");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -293,7 +293,7 @@ const Gallery = () => {
                     >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/images/home/so/facebook.png"
+                        src="/home/so/facebook.png"
                         alt="Facebook"
                       />
                     </a>
@@ -303,14 +303,14 @@ const Gallery = () => {
                     >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/images/home/so/instagram.png"
+                        src="/home/so/instagram.png"
                         alt="Instagram"
                       />
                     </a>
                     <a href={brand.google ? brand.google : "#"} target="_blank">
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/images/home/so/google-logo.png"
+                        src="/home/so/google-logo.png"
                         alt="Google"
                       />
                     </a>
@@ -320,7 +320,7 @@ const Gallery = () => {
                     >
                       <img
                         className="h-6 w-6 rounded object-cover hover:scale-110"
-                        src="/images/home/so/youtube.png"
+                        src="/home/so/youtube.png"
                         alt="Google"
                       />
                     </a>
@@ -374,7 +374,7 @@ const Gallery = () => {
                         >
                           <img
                             className="h-8 w-8 rounded object-cover"
-                            src="/images/home/dp/swiggy.jpg"
+                            src="/home/dp/swiggy.jpg"
                             alt="swiggy"
                           />
                         </a>
@@ -384,7 +384,7 @@ const Gallery = () => {
                         >
                           <img
                             className="h-8 w-8 rounded object-cover"
-                            src="/images/home/dp/zomato.jpg"
+                            src="/home/dp/zomato.jpg"
                             alt="zomato"
                           />
                         </a>
@@ -394,7 +394,7 @@ const Gallery = () => {
                         >
                           <img
                             className="h-8 w-8 rounded object-cover"
-                            src="/images/home/dp/dunzo.jpg"
+                            src="/home/dp/dunzo.jpg"
                             alt="dunzo"
                           />
                         </a>
