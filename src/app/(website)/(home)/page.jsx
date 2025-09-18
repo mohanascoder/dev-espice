@@ -7,6 +7,8 @@ import { ArrowRight, MoveRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import pb from "../_lib/pb";
 import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -242,7 +244,7 @@ const Home = () => {
                   >
                     <div className="flex items-center justify-center">
                       <img
-                        className="h-32 p-2 object-contain"
+                        className="h-24 p-2 object-contain"
                         src={pb.files.getURL(brand, brand.logo)}
                         alt=""
                       />
@@ -454,7 +456,7 @@ const Home = () => {
           </>
         ) : galactive == "vid" ? (
           <>
-            <div className="max-w-7xl">
+            <div className="max-w-7xl mt-4">
               {data.videos && data.videos.length > 0 ? (
                 <Slider {...sliderSettings}>
                   {data.videos.map((video) => (
